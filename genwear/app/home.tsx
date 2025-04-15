@@ -6,6 +6,7 @@ import { Search, Mail, Bell, User, Menu, ChevronRight, ChevronLeft, Star, Plus, 
 import { useState } from "react"
 import { useUser } from './context/UserContext'
 import Footer from '../components/ui/Footer'
+import { cn } from '../lib/utils'
 
 // Helper function to get all products
 const getAllProducts = (shoesProducts: any[], clothingProducts: any[], accessoriesProducts: any[]) => {
@@ -88,52 +89,52 @@ export default function Home() {
   // Product data arrays
   const shoesProducts = [
     [
-      { image: "/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png", name: "adidas Samba OG Shoes", price: "$101.99", rating: 4.9 },
-      { image: "/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men's-Basketball-Shoes-Photoroom.png", name: "PUMA x LAMELO BALL Golden Child", price: "$124.99", rating: 5.0 },
-      { image: "/JORDAN+LUKA+3 (1)-Photoroom.png", name: "Nike Air Jordan Luka 3", price: "$129.99", rating: 5.0 },
-      { image: "/JORDAN+6+RINGS-Photoroom.png", name: "Nike Air Jordan 6 Rings", price: "$169.99", rating: 4.9 },
-      { image: "/WMNS+AIR+JORDAN+1+MID-Photoroom.png", name: "Nike Air Jordan 1 Mid", price: "$124.99", rating: 4.6 }
+      { id: 'samba', image: "/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png", name: "adidas Samba OG Shoes", price: 101.99, rating: 4.9 },
+      { id: 'lamelo-shoes', image: "/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men's-Basketball-Shoes-Photoroom.png", name: "PUMA x LAMELO BALL Golden Child", price: 124.99, rating: 5.0 },
+      { id: 'luka-3', image: "/JORDAN+LUKA+3 (1)-Photoroom.png", name: "Nike Air Jordan Luka 3", price: 129.99, rating: 5.0 },
+      { id: 'jordan-6-rings', image: "/JORDAN+6+RINGS-Photoroom.png", name: "Nike Air Jordan 6 Rings", price: 169.99, rating: 4.9 },
+      { id: 'jordan-1-mid', image: "/WMNS+AIR+JORDAN+1+MID-Photoroom.png", name: "Nike Air Jordan 1 Mid", price: 124.99, rating: 4.6 }
     ],
     [
-      { image: "/placeholder.svg", name: "Nike Air Force 1 '07", price: "$110.99", rating: 4.8 },
-      { image: "/placeholder.svg", name: "adidas Ultra Boost", price: "$180.99", rating: 4.9 },
-      { image: "/placeholder.svg", name: "PUMA RS-X", price: "$85.99", rating: 4.7 },
-      { image: "/placeholder.svg", name: "Nike Dunk Low", price: "$115.99", rating: 4.8 },
-      { image: "/placeholder.svg", name: "adidas NMD R1", price: "$140.99", rating: 4.7 }
+      { id: 'air-force-1', image: "/placeholder.svg", name: "Nike Air Force 1 '07", price: 110.99, rating: 4.8 },
+      { id: 'ultra-boost', image: "/placeholder.svg", name: "adidas Ultra Boost", price: 180.99, rating: 4.9 },
+      { id: 'rs-x', image: "/placeholder.svg", name: "PUMA RS-X", price: 85.99, rating: 4.7 },
+      { id: 'dunk-low', image: "/placeholder.svg", name: "Nike Dunk Low", price: 115.99, rating: 4.8 },
+      { id: 'nmd-r1', image: "/placeholder.svg", name: "adidas NMD R1", price: 140.99, rating: 4.7 }
     ]
   ];
 
   const clothingProducts = [
     [
-      { image: "/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png", name: "adidas Black Shorts Sports", price: "$101.99", rating: 4.9 },
-      { image: "/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png", name: "Tiro 24 Training Pants", price: "$124.99", rating: 5.0 },
-      { image: "/New_York_Red_Bulls_UBP_Travel_Hoodie_Red_JE5524_01_laydown-Photoroom.png", name: "adidas NY Bulls Red Hoodie", price: "$79.99", rating: 4.8 },
-      { image: "/ESS-No.-1-Logo-Men's-Tee-Photoroom.png", name: "PUMA Blue Tee", price: "$169.99", rating: 4.9 },
-      { image: "/F1®-Japan-Men's-Tee-Photoroom.png", name: "F1 Men's Japan", price: "$124.99", rating: 4.6 }
+      { id: 'adidas-shorts', image: "/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png", name: "adidas Black Shorts Sports", price: 101.99, rating: 4.9 },
+      { id: 'adidas-pants', image: "/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png", name: "Tiro 24 Training Pants", price: 124.99, rating: 5.0 },
+      { id: 'adidas-hoodie', image: "/New_York_Red_Bulls_UBP_Travel_Hoodie_Red_JE5524_01_laydown-Photoroom.png", name: "adidas NY Bulls Red Hoodie", price: 79.99, rating: 4.8 },
+      { id: 'puma-tee', image: "/ESS-No.-1-Logo-Men's-Tee-Photoroom.png", name: "PUMA Blue Tee", price: 169.99, rating: 4.9 },
+      { id: 'fenty-tee', image: "/F1®-Japan-Men's-Tee-Photoroom.png", name: "F1 Men's Japan", price: 124.99, rating: 4.6 }
     ],
     [
-      { image: "/placeholder.svg", name: "Nike Dri-FIT Training Shirt", price: "$34.99", rating: 4.7 },
-      { image: "/placeholder.svg", name: "adidas Essentials Track Jacket", price: "$65.99", rating: 4.8 },
-      { image: "/placeholder.svg", name: "PUMA Downtown Hoodie", price: "$89.99", rating: 4.6 },
-      { image: "/placeholder.svg", name: "Nike Tech Fleece Joggers", price: "$110.99", rating: 4.9 },
-      { image: "/placeholder.svg", name: "adidas Originals Tee", price: "$29.99", rating: 4.7 }
+      { id: 'dri-fit', image: "/placeholder.svg", name: "Nike Dri-FIT Training Shirt", price: 34.99, rating: 4.7 },
+      { id: 'track-jacket', image: "/placeholder.svg", name: "adidas Essentials Track Jacket", price: 65.99, rating: 4.8 },
+      { id: 'downtown-hoodie', image: "/placeholder.svg", name: "PUMA Downtown Hoodie", price: 89.99, rating: 4.6 },
+      { id: 'tech-fleece', image: "/placeholder.svg", name: "Nike Tech Fleece Joggers", price: 110.99, rating: 4.9 },
+      { id: 'originals-tee', image: "/placeholder.svg", name: "adidas Originals Tee", price: 29.99, rating: 4.7 }
     ]
   ];
 
   const accessoriesProducts = [
     [
-      { image: "/placeholder.svg", name: "Nike Dri-FIT Legacy91 Cap", price: "$24.99", rating: 4.8 },
-      { image: "/placeholder.svg", name: "adidas Classic Backpack", price: "$45.99", rating: 4.7 },
-      { image: "/placeholder.svg", name: "PUMA Evercat Transformation Duffel", price: "$39.99", rating: 4.5 },
-      { image: "/placeholder.svg", name: "Nike Brasilia Training Gymsack", price: "$19.99", rating: 4.9 },
-      { image: "/placeholder.svg", name: "adidas Originals Socks 3-Pack", price: "$16.99", rating: 4.6 }
+      { id: 'legacy-cap', image: "/placeholder.svg", name: "Nike Dri-FIT Legacy91 Cap", price: 24.99, rating: 4.8 },
+      { id: 'classic-backpack', image: "/placeholder.svg", name: "adidas Classic Backpack", price: 45.99, rating: 4.7 },
+      { id: 'evercat-duffel', image: "/placeholder.svg", name: "PUMA Evercat Transformation Duffel", price: 39.99, rating: 4.5 },
+      { id: 'brasilia-gymsack', image: "/placeholder.svg", name: "Nike Brasilia Training Gymsack", price: 19.99, rating: 4.9 },
+      { id: 'originals-socks', image: "/placeholder.svg", name: "adidas Originals Socks 3-Pack", price: 16.99, rating: 4.6 }
     ],
     [
-      { image: "/placeholder.svg", name: "Nike Elite Basketball Socks", price: "$18.99", rating: 4.7 },
-      { image: "/placeholder.svg", name: "PUMA Pioneer Wallet", price: "$25.99", rating: 4.5 },
-      { image: "/placeholder.svg", name: "adidas Training Gloves", price: "$29.99", rating: 4.6 },
-      { image: "/placeholder.svg", name: "Nike Resistance Band Set", price: "$34.99", rating: 4.8 },
-      { image: "/placeholder.svg", name: "PUMA Performance Headband", price: "$12.99", rating: 4.4 }
+      { id: 'elite-socks', image: "/placeholder.svg", name: "Nike Elite Basketball Socks", price: 18.99, rating: 4.7 },
+      { id: 'pioneer-wallet', image: "/placeholder.svg", name: "PUMA Pioneer Wallet", price: 25.99, rating: 4.5 },
+      { id: 'training-gloves', image: "/placeholder.svg", name: "adidas Training Gloves", price: 29.99, rating: 4.6 },
+      { id: 'resistance-band', image: "/placeholder.svg", name: "Nike Resistance Band Set", price: 34.99, rating: 4.8 },
+      { id: 'performance-headband', image: "/placeholder.svg", name: "PUMA Performance Headband", price: 12.99, rating: 4.4 }
     ]
   ];
 
@@ -200,8 +201,8 @@ export default function Home() {
               <span className="text-xl font-bold text-teal-800">GenWear</span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
-              <Link href="/" className="font-medium text-white">
-                Home
+              <Link href="/browse" className="font-medium text-white">
+                Browse
               </Link>
               <Link href="#" className="font-medium text-white">
                 Contact
@@ -211,9 +212,6 @@ export default function Home() {
               </Link>
               <Link href="#" className="font-medium text-white">
                 About Us
-              </Link>
-              <Link href="/browse" className="font-medium text-white">
-                Browse
               </Link>
             </nav>
           </div>
@@ -236,9 +234,21 @@ export default function Home() {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 focus:outline-none"
                 >
-                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
+                  {user?.profileImage ? (
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        src={user.profileImage}
+                        alt="Profile"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </button>
                 
                 {isProfileOpen && (
@@ -386,6 +396,7 @@ export default function Home() {
                   {shoesProducts[currentShoesPage].map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -430,6 +441,7 @@ export default function Home() {
                   {clothingProducts[currentClothingPage].map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -474,6 +486,7 @@ export default function Home() {
                   {accessoriesProducts[currentAccessoriesPage].map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -600,30 +613,41 @@ export default function Home() {
 }
 
 interface ProductCardProps {
+  id: string;
   image: string;
   name: string;
-  price: string;
+  price: number;
   rating: number;
   className?: string;
 }
 
-function ProductCard({ image, name, price, rating, className = "" }: ProductCardProps) {
+const ProductCard = ({ id, image, name, price, rating, className }: ProductCardProps) => {
   return (
-    <div className={`bg-white rounded-lg shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] transition-all duration-300 p-4 relative border border-gray-100 group ${className}`}>
-      <div className="aspect-square relative mb-4 group-hover:scale-105 transition-transform duration-300">
-        <Image 
-          src={image} 
-          alt={name} 
-          fill 
-          className="object-contain"
-        />
+    <Link href={`/product/${id}`} className={cn('group', className)}>
+      <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300">
+        <div className="relative aspect-square">
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-800 truncate">{name}</h3>
+          <p className="font-bold text-teal-600 mt-1">${price.toFixed(2)}</p>
+          <div className="flex items-center mt-2">
+            <div className="flex text-yellow-400">
+              {Array(5)
+                .fill(0)
+                .map((_, i) => (
+                  <span key={i}>{i < Math.floor(rating) ? "★" : "☆"}</span>
+                ))}
+            </div>
+            <span className="ml-1 text-sm text-gray-600">{rating}</span>
+          </div>
+        </div>
       </div>
-      <h3 className="font-medium text-sm mb-1 text-gray-800">{name}</h3>
-      <p className="text-gray-600 text-sm mb-2">Price {price}</p>
-      <div className="flex items-center gap-1">
-        <span className="text-sm font-medium text-gray-700">{rating}</span>
-        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-      </div>
-    </div>
+    </Link>
   );
-}
+};

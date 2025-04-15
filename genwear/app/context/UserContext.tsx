@@ -1,91 +1,164 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface User {
+  id?: string;
   email: string;
   name: string;
-  phone: string;
-  address: string;
-  birthdate: string;
-  bio: string;
+  phone?: string;
+  address?: string;
+  birthdate?: string;
+  bio?: string;
+  profileImage?: string;
 }
 
 interface UserContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  token: string | null;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
+  signup: (userData: Partial<User> & { password: string }) => Promise<boolean>;
   logout: () => void;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Mock user data for demonstration
-const MOCK_USERS = [
-  {
-    email: 'demo@example.com',
-    password: 'password123',
-    name: 'Demo User',
-    phone: '+1 (555) 123-4567',
-    address: '123 Sports Street, Athletic City, 12345',
-    birthdate: '1990-01-01',
-    bio: 'Passionate about sports and athletic wear. Always looking for the next great workout gear!'
-  }
-];
-
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
 
-  const login = async (email: string, password: string) => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      // Omit password from user data before setting state
-      const { password: _, ...userData } = foundUser;
-      setUser(userData);
-      return true;
-    }
-    return false;
-  };
-
-  const signup = async (email: string, password: string, name: string) => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Check if user already exists
-    if (MOCK_USERS.some(u => u.email === email)) {
-      return false;
-    }
-
-    // Create new user with default profile data
-    const newUser = {
-      email,
-      password,
-      name,
-      phone: '',
-      address: '',
-      birthdate: '',
-      bio: ''
+  useEffect(() => {
+    // Check for stored token and user data on initial load
+    const checkAuth = () => {
+      const storedToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      const tokenExpiration = localStorage.getItem('tokenExpiration');
+      
+      if (storedToken && storedUser) {
+        // Check if token is expired
+        if (tokenExpiration) {
+          const expirationDate = new Date(tokenExpiration);
+          if (expirationDate < new Date()) {
+            // Token is expired, clear storage and return
+            logout();
+            setIsLoading(false);
+            return;
+          }
+        }
+        
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        setIsAuthenticated(true);
+      }
+      setIsLoading(false);
     };
 
-    // Add new user to mock database
-    MOCK_USERS.push(newUser);
-    
-    // Omit password from user data before setting state
-    const { password: _, ...userData } = newUser;
-    setUser(userData);
-    return true;
+    checkAuth();
+  }, []);
+
+  const login = async (email: string, password: string, rememberMe: boolean = false) => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Store token with expiration if rememberMe is true
+      if (rememberMe) {
+        // Set token to expire in 30 days
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        localStorage.setItem('tokenExpiration', expirationDate.toISOString());
+        localStorage.setItem('token', data.token);
+      } else {
+        // Set token to expire when browser session ends
+        sessionStorage.setItem('token', data.token);
+      }
+      
+      setToken(data.token);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      router.push('/');
+      
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
+  const signup = async (userData: Partial<User> & { password: string }) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      return false;
+    }
   };
 
   const logout = () => {
+    // Clear token, user data, and expiration
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tokenExpiration');
+    
+    setToken(null);
     setUser(null);
+    setIsAuthenticated(false);
+    
+    // Redirect to login page
+    router.push('/login');
+  };
+
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
   };
 
   return (
-    <UserContext.Provider value={{ user, login, signup, logout }}>
+    <UserContext.Provider value={{ 
+      user, 
+      token,
+      login, 
+      signup, 
+      logout, 
+      isAuthenticated,
+      isLoading,
+      updateUser
+    }}>
       {children}
     </UserContext.Provider>
   );

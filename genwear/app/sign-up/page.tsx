@@ -2,15 +2,85 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Eye, EyeOff, CheckCircle } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import { useUser } from '../context/UserContext'
 
 export default function SignUp() {
+  const router = useRouter();
+  const { signup } = useUser();
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const success = await signup({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (success) {
+        setShowSuccess(true);
+        // Delay redirect to show success message
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+      } else {
+        setError('Failed to create account. Email may already be in use.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create account');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      {/* Success Message */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 transform transition-all duration-500 ease-in-out animate-fade-in-up">
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-scale-in">
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Account Created Successfully!</h3>
+              <p className="text-gray-600 text-center">Redirecting you to login...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="p-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2">
@@ -40,12 +110,19 @@ export default function SignUp() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Join US</h1>
           </div>
 
-          <form className="mt-8 space-y-6">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+            
             <div className="space-y-6">
               <div>
                 <input
                   type="text"
+                  name="name"
                   placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border-b border-gray-300 focus:border-teal-500 outline-none transition-colors"
                   required
                 />
@@ -54,7 +131,10 @@ export default function SignUp() {
               <div>
                 <input
                   type="email"
+                  name="email"
                   placeholder="Email Address"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border-b border-gray-300 focus:border-teal-500 outline-none transition-colors"
                   required
                 />
@@ -63,7 +143,10 @@ export default function SignUp() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
                   placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border-b border-gray-300 focus:border-teal-500 outline-none transition-colors"
                   required
                 />
@@ -79,7 +162,10 @@ export default function SignUp() {
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
                   placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border-b border-gray-300 focus:border-teal-500 outline-none transition-colors"
                   required
                 />
@@ -125,9 +211,10 @@ export default function SignUp() {
 
               <button
                 type="submit"
-                className="w-full bg-[#00e0c6] text-white rounded-md py-3 hover:bg-[#00c4ad] transition-colors font-medium"
+                disabled={loading}
+                className="w-full bg-[#00e0c6] text-white rounded-md py-3 hover:bg-[#00c4ad] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign Up
+                {loading ? 'Creating account...' : 'Sign Up'}
               </button>
 
               <p className="text-center text-sm text-gray-600">

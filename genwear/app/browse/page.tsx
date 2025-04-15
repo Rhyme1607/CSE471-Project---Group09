@@ -2,13 +2,16 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight, Search, Menu, Mail, Bell, User } from "lucide-react"
+import { ChevronRight, Search, Menu, Mail, Bell, User, Settings, LogOut } from "lucide-react"
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Slider } from "@/components/ui/slider"
+import { useRouter } from 'next/navigation';
+import { useUser } from '../context/UserContext';
+import Footer from '@/components/ui/Footer';
 
 // Add type definitions for filter state
 type FilterState = {
@@ -34,13 +37,24 @@ type FilterState = {
 type FilterType = keyof FilterState;
 
 export default function Page() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, logout } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
   const [showFirstBanner] = useState(Math.random() < 0.5);
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const productsPerPage = 12; // Number of products per page
-  const [activeTab, setActiveTab] = useState("all"); // Active filter tab
+  const productsPerPage = 12;
+  const [activeTab, setActiveTab] = useState("all");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
+  // Add useEffect to handle initial loading state
+  useEffect(() => {
+    if (!isLoading) {
+      setIsPageLoading(false);
+    }
+  }, [isLoading]);
 
   // Update the filter state with proper typing
   const [filters, setFilters] = useState<FilterState>({
@@ -67,32 +81,51 @@ export default function Page() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  if (isPageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   const allProducts = [
-    { image: "/JORDAN+6+RINGS-Photoroom.png?height=auto&width=auto", name: "Nike Air Jordan 6 Rings", price: "$169.99", rating: 4.9, category: "shoes" },
-    { image: "/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png?height=200&width=200", name: "adidas Samba OG Shoes", price: "$101.99", rating: 4.9, category: "shoes" },
-    { image: "/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men's-Basketball-Shoes-Photoroom.png?height=200&width=200", name: "PUMA x LAMELO BALL Golden Child", price: "$124.99", rating: 5.0, category: "shoes" },
-    { image: "/JORDAN+LUKA+3 (1)-Photoroom.png?height=200&width=200", name: "Nike Air Jordan Luka 3", price: "$129.99", rating: 5.0, category: "shoes" },
-    { image: "/WMNS+AIR+JORDAN+1+MID-Photoroom.png?height=200&width=200", name: "Nike Air Jordan 1 Mid Women", price: "$124.99", rating: 4.6, category: "shoes" },
-    { image: "/FENTY-x-PUMA-Avanti-LS-Stitched-Men's-Sneakers-Photoroom.png?height=200&width=200", name: "FENTY x PUMA", price: "$124.99", rating: 4.6, category: "shoes" },
-    { image: "/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png?height=200&width=200", name: "adidas Black Shorts Sports", price: "$101.99", rating: 4.9, category: "clothing" },
-    { image: "/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png?height=200&width=200", name: "adidas 24 Training Pants", price: "$124.99", rating: 5.0, category: "clothing" },
-    { image: "/New_York_Red_Bulls_UBP_Travel_Hoodie_Red_JE5524_01_laydown-Photoroom.png?height=200&width=200", name: "adidas NY Bulls Red Hoodie", price: "$79.99", rating: 4.8, category: "clothing" },
-    { image: "/ESS-No.-1-Logo-Men's-Tee-Photoroom.png?height=200&width=200", name: "PUMA Blue Tee", price: "$169.99", rating: 4.9, category: "clothing" },
-    { image: "/F1®-Japan-Men's-Tee-Photoroom.png?height=200&width=200", name: "Fenty Men's Japan", price: "$124.99", rating: 4.6, category: "clothing" },
-    { image: "/PUMA-x-LAMELO-BALL-Golden-Child-Men's-Basketball-Shirt-Photoroom.png?height=200&width=200", name: "Puma X Lamelo Golden", price: "$124.99", rating: 4.6, category: "clothing" },
-    { image: "/placeholder.svg?height=200&width=200", name: "Nike Training Gloves", price: "$29.99", rating: 4.7, category: "accessories" },
-    { image: "/placeholder.svg?height=200&width=200", name: "adidas Sports Bag", price: "$59.99", rating: 4.8, category: "accessories" },
-    { image: "/placeholder.svg?height=200&width=200", name: "PUMA Cap", price: "$24.99", rating: 4.5, category: "accessories" },
+    // Shoes
+    { id: 'jordan-6-rings', image: "/JORDAN+6+RINGS-Photoroom.png?height=auto&width=auto", name: "Nike Air Jordan 6 Rings", price: 169.99, rating: 4.9, category: "shoes" },
+    { id: 'samba', image: "/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png?height=200&width=200", name: "adidas Samba OG Shoes", price: 101.99, rating: 4.9, category: "shoes" },
+    { id: 'lamelo-shoes', image: "/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men's-Basketball-Shoes-Photoroom.png?height=200&width=200", name: "PUMA x LAMELO BALL Golden Child", price: 124.99, rating: 5.0, category: "shoes" },
+    { id: 'luka-3', image: "/JORDAN+LUKA+3 (1)-Photoroom.png?height=200&width=200", name: "Nike Air Jordan Luka 3", price: 129.99, rating: 5.0, category: "shoes" },
+    { id: 'jordan-1-mid', image: "/WMNS+AIR+JORDAN+1+MID-Photoroom.png?height=200&width=200", name: "Nike Air Jordan 1 Mid", price: 124.99, rating: 4.6, category: "shoes" },
+    // Clothing
+    { id: 'adidas-shorts', image: "/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png?height=200&width=200", name: "adidas Black Shorts Sports", price: 101.99, rating: 4.9, category: "clothing" },
+    { id: 'adidas-pants', image: "/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png?height=200&width=200", name: "Tiro 24 Training Pants", price: 124.99, rating: 5.0, category: "clothing" },
+    { id: 'adidas-hoodie', image: "/New_York_Red_Bulls_UBP_Travel_Hoodie_Red_JE5524_01_laydown-Photoroom.png?height=200&width=200", name: "adidas NY Bulls Red Hoodie", price: 79.99, rating: 4.8, category: "clothing" },
+    { id: 'puma-tee', image: "/ESS-No.-1-Logo-Men's-Tee-Photoroom.png?height=200&width=200", name: "PUMA Blue Tee", price: 169.99, rating: 4.9, category: "clothing" },
+    { id: 'fenty-tee', image: "/F1®-Japan-Men's-Tee-Photoroom.png?height=200&width=200", name: "F1 Men's Japan", price: 124.99, rating: 4.6, category: "clothing" },
+    // Accessories
+    { id: 'legacy-cap', image: "/placeholder.svg?height=200&width=200", name: "Nike Dri-FIT Legacy91 Cap", price: 24.99, rating: 4.8, category: "accessories" },
+    { id: 'classic-backpack', image: "/placeholder.svg?height=200&width=200", name: "adidas Classic Backpack", price: 45.99, rating: 4.7, category: "accessories" },
+    { id: 'evercat-duffel', image: "/placeholder.svg?height=200&width=200", name: "PUMA Evercat Transformation Duffel", price: 39.99, rating: 4.5, category: "accessories" },
+    { id: 'brasilia-gymsack', image: "/placeholder.svg?height=200&width=200", name: "Nike Brasilia Training Gymsack", price: 19.99, rating: 4.9, category: "accessories" },
+    { id: 'originals-socks', image: "/placeholder.svg?height=200&width=200", name: "adidas Originals Socks 3-Pack", price: 16.99, rating: 4.6, category: "accessories" },
+    { id: 'elite-socks', image: "/placeholder.svg?height=200&width=200", name: "Nike Elite Basketball Socks", price: 18.99, rating: 4.7, category: "accessories" },
+    { id: 'pioneer-wallet', image: "/placeholder.svg?height=200&width=200", name: "PUMA Pioneer Wallet", price: 25.99, rating: 4.5, category: "accessories" },
+    { id: 'training-gloves', image: "/placeholder.svg?height=200&width=200", name: "adidas Training Gloves", price: 29.99, rating: 4.6, category: "accessories" },
+    { id: 'resistance-band', image: "/placeholder.svg?height=200&width=200", name: "Nike Resistance Band Set", price: 34.99, rating: 4.8, category: "accessories" },
+    { id: 'performance-headband', image: "/placeholder.svg?height=200&width=200", name: "PUMA Performance Headband", price: 12.99, rating: 4.4, category: "accessories" }
   ];
 
   // Update the filtering logic to use the new filter state
   const filteredProducts = allProducts.filter((product) => {
-    const productPrice = parseFloat(product.price.replace("$", ""));
+    const productPrice = parseFloat(product.price.toString());
 
     // Filter by active tab
     const matchesTab = activeTab === "all" || product.category === activeTab;
@@ -171,6 +204,12 @@ export default function Page() {
     setCurrentPage(1);
   };
 
+  const handleLogout = () => {
+    logout();
+    setIsProfileOpen(false);
+    router.push('/login');
+  };
+
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
@@ -228,9 +267,59 @@ export default function Page() {
             <button className="p-2">
               <Bell className="w-6 h-6" />
             </button>
-            <Link href="/login" className="p-2">
-              <User className="w-6 h-6" />
-            </Link>
+            {isAuthenticated ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 focus:outline-none"
+                >
+                  {user?.profileImage ? (
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        src={user.profileImage}
+                        alt="Profile"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                      {user?.name?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                </button>
+                
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    </div>
+                    
+                    <Link 
+                      href="/profile"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Manage Profile
+                    </Link>
+                    
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button className="p-2" onClick={() => router.push('/login')}>
+                <User className="w-6 h-6" />
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -674,6 +763,7 @@ export default function Page() {
                   {displayedProducts.map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -689,6 +779,7 @@ export default function Page() {
                   {displayedProducts.map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -704,6 +795,7 @@ export default function Page() {
                   {displayedProducts.map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -719,6 +811,7 @@ export default function Page() {
                   {displayedProducts.map((product, index) => (
                     <ProductCard
                       key={index}
+                      id={product.id}
                       image={product.image}
                       name={product.name}
                       price={product.price}
@@ -880,242 +973,47 @@ export default function Page() {
         </div>
       )}
       
-      {/* Footer */}
-      <footer className="bg-gray-100 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Image
-                  src="/Adobe Express - file.png"
-                  alt="GenWear Logo"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10"
-                />
-                <h3 className="font-bold text-lg text-teal-600">GenWear</h3>
-              </div>
-              <p className="text-gray-600 mb-4">Your one-stop shop for premium sportswear and athletic gear.</p>
-              <div className="flex items-center gap-4">
-                <a href="#" className="text-gray-600 hover:text-teal-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-600 hover:text-teal-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-600 hover:text-teal-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Shop</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Men
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Women
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Kids
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Shoes
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Clothing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Accessories
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Help</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Customer Service
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Track Order
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Returns & Refunds
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    Sizing Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-600 hover:text-teal-600">
-                    FAQ
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">Contact</h3>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mt-1"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                  </svg>
-                  <span className="text-gray-600">+1 (234) 567-8901</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mt-1"
-                  >
-                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                  </svg>
-                  <span className="text-gray-600">support@genwear.com</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mt-1"
-                  >
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
-                  <span className="text-gray-600">123 Sports Avenue, Athletic City, AC 12345</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-200 mt-8 pt-8 text-center text-gray-500">
-            <p>© 2024 GenWear. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   )
 }
 
 // Product Card Component
 interface ProductCardProps {
+  id: string;
   image: string;
   name: string;
-  price: string;
+  price: number;
   rating: number;
 }
 
-function ProductCard({ image, name, price, rating }: ProductCardProps) {
+function ProductCard({ id, image, name, price, rating }: ProductCardProps) {
   return (
-    <div className="bg-white rounded-lg overflow-hidden border border-card shadow-sm hover:shadow-lg transition-shadow">
-      <div className="relative group aspect-square">
-        <Image
-          src={image || "/placeholder.svg"}
-          alt={name}
-          width={200}
-          height={200}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-          placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4eHRoaHSQtJSEkLzYvLy0vLi44QjY4OEI4Li8vQUVFRkZFRUVFRUVFRUVFRUVFRUX/2wBDAR0XFyAeIBogHiAeIBogHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-        />
-      </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-gray-800 truncate">{name}</h3>
-        <p className="font-bold text-teal-600 mt-1">{price}</p>
-        <div className="flex items-center mt-2">
-          <div className="flex text-yellow-400">
-            {Array(5)
-              .fill(0)
-              .map((_, i) => (
-                <span key={i}>{i < Math.floor(rating) ? "★" : "☆"}</span>
-              ))}
+    <Link href={`/product/${id}`} className="block">
+      <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300">
+        <div className="relative aspect-square">
+          <Image
+            src={image || "/placeholder.svg"}
+            alt={name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-800 truncate">{name}</h3>
+          <p className="font-bold text-teal-600 mt-1">${price.toFixed(2)}</p>
+          <div className="flex items-center mt-2">
+            <div className="flex text-yellow-400">
+              {Array(5)
+                .fill(0)
+                .map((_, i) => (
+                  <span key={i}>{i < Math.floor(rating) ? "★" : "☆"}</span>
+                ))}
+            </div>
+            <span className="ml-1 text-sm text-gray-600">{rating}</span>
           </div>
-          <span className="ml-1 text-sm text-gray-600">{rating}</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

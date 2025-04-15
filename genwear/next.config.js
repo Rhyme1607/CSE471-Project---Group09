@@ -2,6 +2,8 @@
 const nextConfig = {
   images: {
     domains: ['localhost'],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
   },
 }
 
