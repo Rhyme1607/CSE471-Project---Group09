@@ -170,107 +170,122 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 md:px-8">
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/Adobe Express - file.png?height=32&width=32"
-              alt="GenWear Logo"
-              width={32}
-              height={32}
-              className="text-teal-500"
-            />
-            <span className="text-xl font-bold text-teal-800">GenWear</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className="font-medium">
-              Home
-            </Link>
-            <Link href="#" className="font-medium">
-              Contact
-            </Link>
-            <Link href="/sign-up" className="font-medium">
-              Sign Up
-            </Link>
-            <Link href="#" className="font-medium">
-              About Us
-            </Link>
-            <Link href="/browse" className="font-medium">
-              Browse
-            </Link>
-          </nav>
+      {/* Combined Video and Banner Container */}
+      <div className="relative">
+        {/* Video Background - Fixed aspect ratio container */}
+        <div className="w-full relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 aspect ratio */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover"
+          >
+            <source src="/AIRFLUX 20.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden md:block">
-            <SearchBar products={allProducts} />
-          </div>
-          <button className="hidden md:block">
-            <Menu className="w-6 h-6" />
-          </button>
-          <button className="hidden md:block">
-            <Mail className="w-6 h-6 text-gray-600" />
-          </button>
-          <button className="hidden md:block">
-            <Bell className="w-6 h-6" />
-          </button>
-          {user ? (
-            <div className="relative">
-              <button 
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 focus:outline-none"
-              >
-                <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              </button>
-              
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                  
-                  <Link 
-                    href="/profile"
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Manage Profile
-                  </Link>
-                  
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsProfileOpen(false);
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-                </div>
-              )}
+
+        {/* Header - Positioned absolutely over the video */}
+        <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 md:px-8 z-20 bg-transparent border-b-0">
+          <div className="flex items-center gap-12">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/Adobe Express - file.png?height=32&width=32"
+                alt="GenWear Logo"
+                width={32}
+                height={32}
+                className="text-teal-500"
+              />
+              <span className="text-xl font-bold text-teal-800">GenWear</span>
             </div>
-          ) : (
-            <Link href="/login">
-              <User className="w-6 h-6" />
-            </Link>
-          )}
-        </div>
-      </header>
+            <nav className="hidden md:flex items-center gap-8">
+              <Link href="/" className="font-medium text-white">
+                Home
+              </Link>
+              <Link href="#" className="font-medium text-white">
+                Contact
+              </Link>
+              <Link href="/sign-up" className="font-medium text-white">
+                Sign Up
+              </Link>
+              <Link href="#" className="font-medium text-white">
+                About Us
+              </Link>
+              <Link href="/browse" className="font-medium text-white">
+                Browse
+              </Link>
+            </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="hidden md:block">
+              <SearchBar products={allProducts} />
+            </div>
+            <button className="hidden md:block text-white">
+              <Menu className="w-6 h-6" />
+            </button>
+            <button className="hidden md:block text-white">
+              <Mail className="w-6 h-6" />
+            </button>
+            <button className="hidden md:block text-white">
+              <Bell className="w-6 h-6" />
+            </button>
+            {user ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 focus:outline-none"
+                >
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                </button>
+                
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    
+                    <Link 
+                      href="/profile"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Manage Profile
+                    </Link>
+                    
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login">
+                <User className="w-6 h-6 text-white" />
+              </Link>
+            )}
+          </div>
+        </header>
 
-      <main className="flex-1 pb-12 relative">
-        {/* Banner with Decorative Elements */}
-        <div className="w-full py-8 flex justify-center overflow-hidden bg-[#00e0c6] relative">
-          {/* Decorative Circles */}
-          <div className="absolute top-0 left-0 w-32 h-32 rounded-full bg-[#00f2d8] opacity-30 -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute top-1/2 left-1/4 w-16 h-16 rounded-full bg-[#00f2d8] opacity-20"></div>
-          <div className="absolute bottom-0 right-1/4 w-24 h-24 rounded-full bg-[#00f2d8] opacity-30 translate-y-1/2"></div>
-          <div className="absolute top-1/3 right-10 w-40 h-40 rounded-full bg-[#00f2d8] opacity-20"></div>
+        {/* Banner with Decorative Elements - Directly below video with no gap */}
+        <div className="w-full py-4 flex justify-center overflow-hidden bg-[#00e0c6] relative">
+          {/* Decorative Circles - Properly contained within the banner */}
+          <div className="absolute top-0 left-0 w-16 h-16 rounded-full bg-[#00f2d8] opacity-30"></div>
+          <div className="absolute top-1/2 left-1/4 w-10 h-10 rounded-full bg-[#00f2d8] opacity-20"></div>
+          <div className="absolute bottom-0 right-1/4 w-12 h-12 rounded-full bg-[#00f2d8] opacity-30"></div>
+          <div className="absolute top-1/3 right-10 w-14 h-14 rounded-full bg-[#00f2d8] opacity-20"></div>
 
-          {/* Wavy Lines */}
+          {/* Wavy Lines - Properly contained within the banner */}
           <svg
             className="absolute left-0 top-0 h-full w-1/5 opacity-10"
             viewBox="0 0 100 100"
@@ -334,11 +349,13 @@ export default function Home() {
             />
           </div>
         </div>
+      </div>
 
+      <main className="flex-1 pb-12 relative">
         {/* Main Content */}
-        <div className="pl-8 pr-96">
+        <div className="pl-8 pr-96 mt-8">
           {/* Shoes Section */}
-          <section className="mt-8">
+          <section>
             <h2 className="text-xl font-bold text-teal-800 mb-4">Shoes</h2>
             
             <div className="flex">
