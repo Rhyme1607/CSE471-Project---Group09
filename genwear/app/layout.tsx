@@ -6,8 +6,12 @@ import { UserProvider } from './context/UserContext';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GenWear",
+  title: "GenWear - Premium Sportswear & Athletic Gear",
   description: "Your one-stop shop for trendy fashion",
+  icons: {
+    icon: '/Adobe Express - file.png',
+    apple: '/Adobe Express - file.png',
+  },
 };
 
 export default function RootLayout({
