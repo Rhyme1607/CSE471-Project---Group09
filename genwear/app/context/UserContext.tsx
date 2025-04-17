@@ -38,7 +38,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Check for stored token and user data on initial load
     const checkAuth = () => {
       const storedToken = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
       const tokenExpiration = localStorage.getItem('tokenExpiration');
       
       if (storedToken && storedUser) {
@@ -79,16 +79,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store token with expiration if rememberMe is true
+      // Store token and user data with expiration if rememberMe is true
       if (rememberMe) {
         // Set token to expire in 30 days
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + 30);
         localStorage.setItem('tokenExpiration', expirationDate.toISOString());
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
       } else {
         // Set token to expire when browser session ends
         sessionStorage.setItem('token', data.token);
+        sessionStorage.setItem('user', JSON.stringify(data.user));
       }
       
       setToken(data.token);
@@ -127,10 +129,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    // Clear token, user data, and expiration
+    // Clear token, user data, and expiration from both localStorage and sessionStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('tokenExpiration');
+    localStorage.removeItem('cart'); // Clear cart from localStorage
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     
     setToken(null);
     setUser(null);
@@ -144,7 +149,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Update user data in both storage types
+      if (localStorage.getItem('token')) {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+      if (sessionStorage.getItem('token')) {
+        sessionStorage.setItem('user', JSON.stringify(updatedUser));
+      }
     }
   };
 

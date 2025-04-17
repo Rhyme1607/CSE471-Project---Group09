@@ -41,7 +41,7 @@ export const products = [
     colors: ['Black/White', 'White/Black', 'Navy/White'],
     images: [
       '/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png',
-      '/Samba_OG_Shoes_White_JH5633_02_standard-Photoroom.png',
+      '/Samba_OG_Shoes_White_JH5633_02_standard_hover-Photoroom.png',
       '/Samba_OG_Shoes_White_JH5633_03_standard-Photoroom.png',
     ],
   },
@@ -196,8 +196,8 @@ export const products = [
     colors: ['Blue', 'Black', 'White'],
     images: [
       '/ESS-No.-1-Logo-Men\'s-Tee-Photoroom.png',
-      '/ESS-No.-1-Logo-Men\'s-Tee-02-Photoroom.png',
-      '/ESS-No.-1-Logo-Men\'s-Tee-03-Photoroom.png',
+      '/PUMA Blue Tee-1.jpg',
+      '/PUMA Blue Tee-2.jpg',
     ],
   },
   {

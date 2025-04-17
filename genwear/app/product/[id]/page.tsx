@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Star, Truck, RotateCcw, Shield, Heart, Plus } from 'lucide-react';
+import { ChevronRight, Star, Truck, RotateCcw, Shield, Heart, Plus, Menu, Mail, Bell, User, Settings, LogOut, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Footer from '@/components/ui/Footer';
 import { getProductById, getProductByName, getSimilarProducts } from '@/app/utils/productUtils';
+import { useUser } from '@/app/context/UserContext';
+import { useCart } from '@/app/context/CartContext';
+import CartIcon from '../../components/CartIcon';
+import IframeModelViewer from '@/app/components/IframeModelViewer';
 
 // CSS for hiding scrollbar
 const styles = `
@@ -27,12 +31,19 @@ const styles = `
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useUser();
+  const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [product, setProduct] = useState<any>(null);
   const [similarProducts, setSimilarProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [show3DModel, setShow3DModel] = useState(false);
+  const [modelError, setModelError] = useState(false);
 
   useEffect(() => {
     const productIdOrName = params.id as string;
@@ -55,6 +66,58 @@ export default function ProductPage() {
     
     setLoading(false);
   }, [params.id, router]);
+
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      alert('Please select a size');
+      return;
+    }
+    
+    if (!selectedColor) {
+      alert('Please select a color');
+      return;
+    }
+    
+    if (product) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0],
+        quantity: quantity,
+        size: selectedSize,
+        color: selectedColor
+      });
+      
+      setAddedToCart(true);
+      setTimeout(() => setAddedToCart(false), 2000);
+    }
+  };
+
+  // Add this function to get the 3D model URL based on product name
+  const get3DModelUrl = (productName: string) => {
+    // For now, only return the URL for Nike Air Jordan Luka 3
+    if (productName.toLowerCase().includes('jordan luka 3')) {
+      return '/Jordan Luka 3.glb';
+    }
+    // Add support for PUMA x LAMELO BALL Golden Child
+    if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('lamelo') && productName.toLowerCase().includes('golden')) {
+      return '/PUMA x Lamelo Golden.glb';
+    }
+    // Add support for PUMA Blue Tee
+    if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('blue tee')) {
+      return '/Blue PUMA Tee.glb';
+    }
+    // Add support for adidas Samba OG Shoes
+    if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('samba')) {
+      return '/adidas Samba OG Shoes.glb';
+    }
+    // Add support for adidas Black Shorts Sports
+    if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('shorts')) {
+      return '/adidas Black Shorts Sports.glb';
+    }
+    return null;
+  };
 
   if (loading) {
     return (
@@ -105,9 +168,72 @@ export default function ProductPage() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            <CartIcon />
             <button className="p-2">
               <Heart className="w-6 h-6 text-gray-600 hover:text-teal-600" />
             </button>
+            <button className="p-2">
+              <Mail className="w-6 h-6 text-gray-600" />
+            </button>
+            <button className="p-2">
+              <Bell className="w-6 h-6 text-gray-600" />
+            </button>
+            {isAuthenticated ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 focus:outline-none"
+                >
+                  {user?.profileImage ? (
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        src={user.profileImage}
+                        alt="Profile"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                      {user?.name?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                </button>
+                
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    </div>
+                    
+                    <Link 
+                      href="/profile"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Manage Profile
+                    </Link>
+                    
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login" className="p-2">
+                <User className="w-6 h-6 text-gray-600 hover:text-teal-600" />
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -130,30 +256,44 @@ export default function ProductPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-              <Image
-                src={product.images[currentImageIndex]}
-                alt={product.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {product.images.map((image: string, index: number) => (
-                <button
-                  key={index}
-                  className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 hover:border-teal-600 transition-colors"
-                  onClick={() => setCurrentImageIndex(index)}
-                >
+            {show3DModel ? (
+              <IframeModelViewer modelUrl={get3DModelUrl(product.name)} />
+            ) : (
+              <>
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
                   <Image
-                    src={image}
-                    alt={`${product.name} view ${index + 1}`}
+                    src={product.images[currentImageIndex]}
+                    alt={product.name}
                     fill
                     className="object-cover"
                   />
-                </button>
-              ))}
-            </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {product.images.map((image: string, index: number) => (
+                    <button
+                      key={index}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 hover:border-teal-600 transition-colors"
+                      onClick={() => setCurrentImageIndex(index)}
+                    >
+                      <Image
+                        src={image}
+                        alt={`${product.name} view ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+            
+            {/* Add 3D Model Toggle Button */}
+            <button
+              onClick={() => setShow3DModel(!show3DModel)}
+              className="w-full py-2 px-4 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+            >
+              {show3DModel ? 'Show Product Images' : 'Show 3D Model'}
+            </button>
           </div>
 
           {/* Product Info */}
@@ -208,6 +348,82 @@ export default function ProductPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Color
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {product.colors.map((color: string) => {
+                    // Check if it's a dual color (contains a slash)
+                    const isDualColor = color.includes('/');
+                    
+                    if (isDualColor) {
+                      // Split the color into two parts
+                      const [color1, color2] = color.split('/');
+                      const color1Value = getColorValue(color1);
+                      const color2Value = getColorValue(color2);
+                      
+                      return (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center overflow-hidden relative ${
+                            selectedColor === color 
+                              ? 'border-teal-600' 
+                              : 'border-gray-300'
+                          }`}
+                          title={color}
+                        >
+                          {/* First half of the circle */}
+                          <div 
+                            className="absolute top-0 left-0 w-1/2 h-full"
+                            style={{ backgroundColor: color1Value }}
+                          ></div>
+                          
+                          {/* Second half of the circle */}
+                          <div 
+                            className="absolute top-0 right-0 w-1/2 h-full"
+                            style={{ backgroundColor: color2Value }}
+                          ></div>
+                          
+                          {/* Checkmark for selected color */}
+                          {selectedColor === color && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <Check className="w-5 h-5 text-white drop-shadow-md" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    } else {
+                      // Single color
+                      const colorValue = getColorValue(color);
+                      return (
+                        <button
+                          key={color}
+                          onClick={() => setSelectedColor(color)}
+                          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${
+                            selectedColor === color 
+                              ? 'border-teal-600' 
+                              : 'border-gray-300'
+                          }`}
+                          style={{ backgroundColor: colorValue }}
+                          title={color}
+                        >
+                          {selectedColor === color && (
+                            <Check className="w-5 h-5 text-white" />
+                          )}
+                        </button>
+                      );
+                    }
+                  })}
+                </div>
+                {selectedColor && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Selected: <span className="font-medium">{selectedColor}</span>
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Quantity
                 </label>
                 <div className="flex items-center gap-4">
@@ -218,7 +434,12 @@ export default function ProductPage() {
                     onChange={(e) => setQuantity(parseInt(e.target.value))}
                     className="w-20"
                   />
-                  <Button className="flex-1">Add to Cart</Button>
+                  <Button 
+                    className="flex-1"
+                    onClick={handleAddToCart}
+                  >
+                    {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -322,4 +543,38 @@ export default function ProductPage() {
       <Footer />
     </div>
   );
+}
+
+// Helper function to convert color names to actual color values
+function getColorValue(colorName: string): string {
+  // Map common color names to actual color values
+  const colorMap: Record<string, string> = {
+    'Black': '#000000',
+    'White': '#FFFFFF',
+    'Red': '#FF0000',
+    'Blue': '#0000FF',
+    'Green': '#008000',
+    'Yellow': '#FFFF00',
+    'Purple': '#800080',
+    'Orange': '#FFA500',
+    'Pink': '#FFC0CB',
+    'Brown': '#A52A2A',
+    'Grey': '#808080',
+    'Navy': '#000080',
+    'Gold': '#FFD700',
+    'Silver': '#C0C0C0',
+    'Black/Red': '#000000',
+    'White/Black': '#FFFFFF',
+    'Grey/Blue': '#808080',
+    'Black/White': '#000000',
+    'Navy/White': '#000080',
+    'Black/Gold': '#000000',
+    'White/Gold': '#FFFFFF',
+    'Blue/Gold': '#0000FF',
+    'Red/Black': '#FF0000',
+    'White/Blue': '#FFFFFF',
+    'Grey/Orange': '#808080',
+  };
+  
+  return colorMap[colorName] || '#CCCCCC'; // Default to light gray if color not found
 } 

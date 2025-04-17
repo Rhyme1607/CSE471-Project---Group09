@@ -7,6 +7,7 @@ import { useState } from "react"
 import { useUser } from './context/UserContext'
 import Footer from '../components/ui/Footer'
 import { cn } from '../lib/utils'
+import CartIcon from './components/CartIcon'
 
 // Helper function to get all products
 const getAllProducts = (shoesProducts: any[], clothingProducts: any[], accessoriesProducts: any[]) => {
@@ -207,9 +208,11 @@ export default function Home() {
               <Link href="#" className="font-medium text-white">
                 Contact
               </Link>
-              <Link href="/sign-up" className="font-medium text-white">
-                Sign Up
-              </Link>
+              {!user && (
+                <Link href="/sign-up" className="font-medium text-white">
+                  Sign Up
+                </Link>
+              )}
               <Link href="#" className="font-medium text-white">
                 About Us
               </Link>
@@ -228,6 +231,9 @@ export default function Home() {
             <button className="hidden md:block text-white">
               <Bell className="w-6 h-6" />
             </button>
+            <div>
+              <CartIcon className="text-white hover:text-teal-200 transition-colors" />
+            </div>
             {user ? (
               <div className="relative">
                 <button 

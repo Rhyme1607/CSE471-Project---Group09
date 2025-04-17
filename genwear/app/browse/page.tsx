@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight, Search, Menu, Mail, Bell, User, Settings, LogOut } from "lucide-react"
+import { ChevronRight, Search, Menu, Mail, Bell, User, Settings, LogOut, Heart } from "lucide-react"
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -12,6 +12,7 @@ import { Slider } from "@/components/ui/slider"
 import { useRouter } from 'next/navigation';
 import { useUser } from '../context/UserContext';
 import Footer from '@/components/ui/Footer';
+import CartIcon from '../components/CartIcon';
 
 // Add type definitions for filter state
 type FilterState = {
@@ -233,15 +234,18 @@ export default function Page() {
               <Link href="/contact" className="text-gray-600 hover:text-teal-600 font-bold">
                 Contact
               </Link>
-              <Link href="/sign-up" className="text-gray-600 hover:text-teal-600 font-bold">
-                Sign Up
-              </Link>
+              {!isAuthenticated && (
+                <Link href="/sign-up" className="text-gray-600 hover:text-teal-600 font-bold">
+                  Sign Up
+                </Link>
+              )}
               <Link href="/about-us" className="text-gray-600 hover:text-teal-600 font-bold">
                 About Us
               </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            <CartIcon />
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
@@ -316,9 +320,9 @@ export default function Page() {
                 )}
               </div>
             ) : (
-              <button className="p-2" onClick={() => router.push('/login')}>
-                <User className="w-6 h-6" />
-              </button>
+              <Link href="/login" className="p-2">
+                <User className="w-6 h-6 text-gray-600 hover:text-teal-600" />
+              </Link>
             )}
           </div>
         </div>
