@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight, Search, Menu, Mail, Bell, User, Settings, LogOut, Heart } from "lucide-react"
+import { ChevronRight, Search, Menu, Mail, Bell, User, Settings, LogOut, Heart, Package } from "lucide-react"
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '../context/UserContext';
 import Footer from '@/components/ui/Footer';
 import CartIcon from '../components/CartIcon';
+import { products } from '@/app/utils/productUtils';
 
 // Add type definitions for filter state
 type FilterState = {
@@ -37,6 +38,22 @@ type FilterState = {
 
 type FilterType = keyof FilterState;
 
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  category?: string;
+  description: string;
+  features: string[];
+  sizes: string[];
+  colors: string[];
+  images: string[];
+  modelUrl?: string;
+  createdAt?: string;
+}
+
 export default function Page() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useUser();
@@ -45,10 +62,12 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("featured");
   const productsPerPage = 12;
   const [activeTab, setActiveTab] = useState("all");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Add useEffect to handle initial loading state
   useEffect(() => {
@@ -56,6 +75,20 @@ export default function Page() {
       setIsPageLoading(false);
     }
   }, [isLoading]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Update the filter state with proper typing
   const [filters, setFilters] = useState<FilterState>({
@@ -75,7 +108,7 @@ export default function Page() {
       rating4: false,
       rating3Below: false
     },
-    priceRange: [0, 300]
+    priceRange: [0, 20000]
   });
 
   // Add useEffect for debouncing search query
@@ -98,34 +131,8 @@ export default function Page() {
     );
   }
 
-  const allProducts = [
-    // Shoes
-    { id: 'jordan-6-rings', image: "/JORDAN+6+RINGS-Photoroom.png?height=auto&width=auto", name: "Nike Air Jordan 6 Rings", price: 169.99, rating: 4.9, category: "shoes" },
-    { id: 'samba', image: "/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png?height=200&width=200", name: "adidas Samba OG Shoes", price: 101.99, rating: 4.9, category: "shoes" },
-    { id: 'lamelo-shoes', image: "/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men's-Basketball-Shoes-Photoroom.png?height=200&width=200", name: "PUMA x LAMELO BALL Golden Child", price: 124.99, rating: 5.0, category: "shoes" },
-    { id: 'luka-3', image: "/JORDAN+LUKA+3 (1)-Photoroom.png?height=200&width=200", name: "Nike Air Jordan Luka 3", price: 129.99, rating: 5.0, category: "shoes" },
-    { id: 'jordan-1-mid', image: "/WMNS+AIR+JORDAN+1+MID-Photoroom.png?height=200&width=200", name: "Nike Air Jordan 1 Mid", price: 124.99, rating: 4.6, category: "shoes" },
-    // Clothing
-    { id: 'adidas-shorts', image: "/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png?height=200&width=200", name: "adidas Black Shorts Sports", price: 101.99, rating: 4.9, category: "clothing" },
-    { id: 'adidas-pants', image: "/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png?height=200&width=200", name: "Tiro 24 Training Pants", price: 124.99, rating: 5.0, category: "clothing" },
-    { id: 'adidas-hoodie', image: "/New_York_Red_Bulls_UBP_Travel_Hoodie_Red_JE5524_01_laydown-Photoroom.png?height=200&width=200", name: "adidas NY Bulls Red Hoodie", price: 79.99, rating: 4.8, category: "clothing" },
-    { id: 'puma-tee', image: "/ESS-No.-1-Logo-Men's-Tee-Photoroom.png?height=200&width=200", name: "PUMA Blue Tee", price: 169.99, rating: 4.9, category: "clothing" },
-    { id: 'fenty-tee', image: "/F1®-Japan-Men's-Tee-Photoroom.png?height=200&width=200", name: "F1 Men's Japan", price: 124.99, rating: 4.6, category: "clothing" },
-    // Accessories
-    { id: 'legacy-cap', image: "/placeholder.svg?height=200&width=200", name: "Nike Dri-FIT Legacy91 Cap", price: 24.99, rating: 4.8, category: "accessories" },
-    { id: 'classic-backpack', image: "/placeholder.svg?height=200&width=200", name: "adidas Classic Backpack", price: 45.99, rating: 4.7, category: "accessories" },
-    { id: 'evercat-duffel', image: "/placeholder.svg?height=200&width=200", name: "PUMA Evercat Transformation Duffel", price: 39.99, rating: 4.5, category: "accessories" },
-    { id: 'brasilia-gymsack', image: "/placeholder.svg?height=200&width=200", name: "Nike Brasilia Training Gymsack", price: 19.99, rating: 4.9, category: "accessories" },
-    { id: 'originals-socks', image: "/placeholder.svg?height=200&width=200", name: "adidas Originals Socks 3-Pack", price: 16.99, rating: 4.6, category: "accessories" },
-    { id: 'elite-socks', image: "/placeholder.svg?height=200&width=200", name: "Nike Elite Basketball Socks", price: 18.99, rating: 4.7, category: "accessories" },
-    { id: 'pioneer-wallet', image: "/placeholder.svg?height=200&width=200", name: "PUMA Pioneer Wallet", price: 25.99, rating: 4.5, category: "accessories" },
-    { id: 'training-gloves', image: "/placeholder.svg?height=200&width=200", name: "adidas Training Gloves", price: 29.99, rating: 4.6, category: "accessories" },
-    { id: 'resistance-band', image: "/placeholder.svg?height=200&width=200", name: "Nike Resistance Band Set", price: 34.99, rating: 4.8, category: "accessories" },
-    { id: 'performance-headband', image: "/placeholder.svg?height=200&width=200", name: "PUMA Performance Headband", price: 12.99, rating: 4.4, category: "accessories" }
-  ];
-
   // Update the filtering logic to use the new filter state
-  const filteredProducts = allProducts.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const productPrice = parseFloat(product.price.toString());
 
     // Filter by active tab
@@ -161,7 +168,28 @@ export default function Page() {
   });
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const displayedProducts = filteredProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
+
+  const getSortedProducts = (products: Product[]) => {
+    switch (sortBy) {
+      case "price-low":
+        return [...products].sort((a, b) => a.price - b.price);
+      case "price-high":
+        return [...products].sort((a, b) => b.price - a.price);
+      case "rating":
+        return [...products].sort((a, b) => b.rating - a.rating);
+      case "newest":
+        return [...products].sort((a, b) => {
+          if (!a.createdAt || !b.createdAt) return 0;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+      default:
+        return products;
+    }
+  };
+
+  // Apply sorting to filtered products
+  const sortedProducts = getSortedProducts(filteredProducts);
+  const displayedProducts = sortedProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -200,7 +228,7 @@ export default function Page() {
         rating4: false,
         rating3Below: false
       },
-      priceRange: [0, 300]
+      priceRange: [0, 20000]
     });
     setCurrentPage(1);
   };
@@ -214,8 +242,10 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-md py-2' : 'bg-white py-4'
+      }`}>
+        <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <Link href="/" className="flex items-center gap-2">
               <Image
@@ -239,7 +269,7 @@ export default function Page() {
                   Sign Up
                 </Link>
               )}
-              <Link href="/about-us" className="text-gray-600 hover:text-teal-600 font-bold">
+              <Link href="/about" className="text-gray-600 hover:text-teal-600 font-bold">
                 About Us
               </Link>
             </nav>
@@ -309,8 +339,19 @@ export default function Page() {
                       Manage Profile
                     </Link>
                     
+                    <Link 
+                      href="/orders"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Package className="w-4 h-4" />
+                      Order History
+                    </Link>
+                    
                     <button
-                      onClick={handleLogout}
+                      onClick={() => {
+                        logout();
+                        setIsProfileOpen(false);
+                      }}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
                     >
                       <LogOut className="w-4 h-4" />
@@ -576,17 +617,22 @@ export default function Page() {
                 {/* Price Range */}
                 <div>
                   <h3 className="font-medium mb-2">Price Range</h3>
-                  <Slider
-                    defaultValue={filters.priceRange}
-                    min={0}
-                    max={300}
-                    step={1}
-                    onValueChange={(value) => handleFilterChange("priceRange", "priceRange", value)}
-                    className="my-6"
-                  />
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">${filters.priceRange[0]}</span>
-                    <span className="text-sm">${filters.priceRange[1]}</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>৳{filters.priceRange[0]}</span>
+                      <span>৳{filters.priceRange[1]}</span>
+                    </div>
+                    <Slider
+                      min={0}
+                      max={20000}
+                      step={100}
+                      value={filters.priceRange}
+                      onValueChange={(value) => {
+                        setFilters(prev => ({ ...prev, priceRange: value }));
+                        setCurrentPage(1);
+                      }}
+                      className="w-full"
+                    />
                   </div>
                 </div>
 
@@ -702,9 +748,9 @@ export default function Page() {
                 FAQ
               </p>
               <div className="flex justify-center relative z-10">
-                <button className="bg-white text-teal-700 font-medium py-2 px-4 rounded-full shadow-md hover:shadow-lg transition-shadow">
-                  Customer Service
-                </button>
+                <Link href="/contact" className="bg-white text-teal-700 font-medium py-2 px-4 rounded-full shadow-md hover:shadow-lg transition-shadow">
+                  Contact Us
+                </Link>
               </div>
             </div>
           </div>
@@ -721,13 +767,12 @@ export default function Page() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span className="text-sm whitespace-nowrap">Sort by:</span>
-                  <Select defaultValue="featured">
-                    <SelectTrigger className="w-[160px] bg-gray-50 border border-gray-300 rounded-md shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-[180px] bg-gray-50 border border-gray-300 rounded-md shadow-sm hover:border-gray-400 focus:ring-2 focus:ring-teal-600 focus:outline-none">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border border-gray-300 rounded-md shadow-lg z-50">
                       <SelectItem value="featured" className="px-4 py-2 hover:bg-teal-50 hover:text-teal-600 cursor-pointer rounded-md">Featured</SelectItem>
-                      <SelectItem value="newest" className="px-4 py-2 hover:bg-teal-50 hover:text-teal-600 cursor-pointer rounded-md">Newest</SelectItem>
                       <SelectItem value="price-low" className="px-4 py-2 hover:bg-teal-50 hover:text-teal-600 cursor-pointer rounded-md">Price: Low to High</SelectItem>
                       <SelectItem value="price-high" className="px-4 py-2 hover:bg-teal-50 hover:text-teal-600 cursor-pointer rounded-md">Price: High to Low</SelectItem>
                       <SelectItem value="rating" className="px-4 py-2 hover:bg-teal-50 hover:text-teal-600 cursor-pointer rounded-md">Top Rated</SelectItem>
@@ -768,7 +813,7 @@ export default function Page() {
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -784,7 +829,7 @@ export default function Page() {
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -800,7 +845,7 @@ export default function Page() {
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -816,7 +861,7 @@ export default function Page() {
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -985,19 +1030,19 @@ export default function Page() {
 // Product Card Component
 interface ProductCardProps {
   id: string;
-  image: string;
+  images: string[];
   name: string;
   price: number;
   rating: number;
 }
 
-function ProductCard({ id, image, name, price, rating }: ProductCardProps) {
+function ProductCard({ id, images, name, price, rating }: ProductCardProps) {
   return (
     <Link href={`/product/${id}`} className="block">
       <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300">
         <div className="relative aspect-square">
           <Image
-            src={image || "/placeholder.svg"}
+            src={images[0] || "/placeholder.svg"}
             alt={name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -1005,7 +1050,7 @@ function ProductCard({ id, image, name, price, rating }: ProductCardProps) {
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-gray-800 truncate">{name}</h3>
-          <p className="font-bold text-teal-600 mt-1">${price.toFixed(2)}</p>
+          <p className="font-bold text-teal-600 mt-1">৳{price.toFixed(2)}</p>
           <div className="flex items-center mt-2">
             <div className="flex text-yellow-400">
               {Array(5)

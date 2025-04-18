@@ -12,6 +12,15 @@ interface User {
   birthdate?: string;
   bio?: string;
   profileImage?: string;
+  shippingAddress?: {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 }
 
 interface UserContextType {
@@ -124,7 +133,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error('Registration error:', error);
-      return false;
+      throw error; // Re-throw the error to be handled by the signup page
     }
   };
 

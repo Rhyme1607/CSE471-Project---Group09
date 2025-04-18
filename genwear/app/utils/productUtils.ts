@@ -4,9 +4,10 @@ export const products = [
   {
     id: 'jordan-6-rings',
     name: 'Nike Air Jordan 6 Rings',
-    price: 169.99,
+    price: 4249.99,
     rating: 4.9,
     reviews: 128,
+    category: 'shoes',
     description: 'The Air Jordan 6 Rings combines elements from the 6 championship rings Michael Jordan earned during his illustrious career. This shoe features a premium leather upper with a clean, modern design that pays homage to the legacy of the greatest basketball player of all time.',
     features: [
       'Premium leather upper for durability and comfort',
@@ -22,13 +23,15 @@ export const products = [
       '/JORDAN+6+RINGS-Photoroom.png',
       '/JORDAN+6+RINGS-Photoroom.png',
     ],
+    modelUrl: '/JORDAN+6+RINGS.glb',
   },
   {
     id: 'samba',
     name: 'adidas Samba OG Shoes',
-    price: 101.99,
+    price: 2549.99,
     rating: 4.9,
     reviews: 95,
+    category: 'shoes',
     description: 'The adidas Samba OG Shoes are a timeless classic that have been a favorite among soccer players and casual wearers alike for decades. These shoes feature a full grain leather upper, a gum rubber outsole, and the iconic 3-Stripes design.',
     features: [
       'Full grain leather upper for durability',
@@ -44,13 +47,15 @@ export const products = [
       '/Samba_OG_Shoes_White_JH5633_02_standard_hover-Photoroom.png',
       '/Samba_OG_Shoes_White_JH5633_03_standard-Photoroom.png',
     ],
+    modelUrl: '/adidas Samba OG Shoes.glb',
   },
   {
     id: 'lamelo-shoes',
     name: 'PUMA x LAMELO BALL Golden Child',
-    price: 124.99,
+    price: 3124.99,
     rating: 5.0,
     reviews: 78,
+    category: 'shoes',
     description: 'The PUMA x LAMELO BALL Golden Child is a collaboration between PUMA and NBA star LaMelo Ball. These shoes feature a bold design with golden accents, premium materials, and innovative cushioning technology for optimal performance on and off the court.',
     features: [
       'Premium materials for comfort and durability',
@@ -66,13 +71,15 @@ export const products = [
       '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes-Photoroom.png',
       '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes-Photoroom.png',
     ],
+    modelUrl: '/PUMA x Lamelo Golden.glb',
   },
   {
     id: 'luka-3',
     name: 'Nike Air Jordan Luka 3',
-    price: 129.99,
+    price: 3249.99,
     rating: 5.0,
     reviews: 112,
+    category: 'shoes',
     description: 'The Nike Air Jordan Luka 3 is designed in collaboration with NBA star Luka Dončić. These shoes feature a lightweight construction, responsive cushioning, and a design inspired by Luka\'s playing style and heritage.',
     features: [
       'Lightweight construction for agility',
@@ -88,13 +95,15 @@ export const products = [
       '/JORDAN+LUKA+3 (2)-Photoroom.png',
       '/AURORA_FQ8185-500_PHSLH001-2000_3024x.jpg',
     ],
+    modelUrl: '/Jordan Luka 3.glb',
   },
   {
     id: 'jordan-1-mid',
     name: 'Nike Air Jordan 1 Mid',
-    price: 124.99,
+    price: 3124.99,
     rating: 4.6,
     reviews: 89,
+    category: 'shoes',
     description: 'The Nike Air Jordan 1 Mid is a mid-top version of the iconic Air Jordan 1. These shoes feature a classic design with modern materials, offering style and comfort for everyday wear.',
     features: [
       'Classic Air Jordan 1 design',
@@ -115,9 +124,10 @@ export const products = [
   {
     id: 'adidas-shorts',
     name: 'adidas Black Shorts Sports',
-    price: 101.99,
+    price: 2549.99,
     rating: 4.9,
     reviews: 85,
+    category: 'clothing',
     description: 'The adidas Black Shorts Sports are perfect for both training and casual wear. Made with lightweight, breathable fabric, these shorts offer comfort and freedom of movement.',
     features: [
       'Lightweight, breathable fabric',
@@ -137,9 +147,10 @@ export const products = [
   {
     id: 'adidas-pants',
     name: 'Tiro 24 Training Pants',
-    price: 124.99,
+    price: 3124.99,
     rating: 5.0,
     reviews: 92,
+    category: 'clothing',
     description: 'The Tiro 24 Training Pants are a modern take on the classic track pants. With a tapered fit and premium materials, these pants offer style and comfort for everyday wear.',
     features: [
       'Premium cotton blend fabric',
@@ -159,9 +170,10 @@ export const products = [
   {
     id: 'adidas-hoodie',
     name: 'adidas NY Bulls Red Hoodie',
-    price: 79.99,
+    price: 1999.99,
     rating: 4.8,
     reviews: 76,
+    category: 'clothing',
     description: 'The adidas NY Bulls Red Hoodie is a stylish and comfortable hoodie perfect for showing your team spirit. Made with soft, warm fabric, this hoodie is ideal for casual wear.',
     features: [
       'Soft, warm fabric',
@@ -181,9 +193,10 @@ export const products = [
   {
     id: 'puma-tee',
     name: 'PUMA Blue Tee',
-    price: 169.99,
+    price: 4249.99,
     rating: 4.9,
     reviews: 88,
+    category: 'clothing',
     description: 'The PUMA Blue Tee is a comfortable and stylish t-shirt perfect for everyday wear. Made with soft, breathable fabric, this tee offers comfort and style.',
     features: [
       'Soft, breathable fabric',
@@ -203,9 +216,10 @@ export const products = [
   {
     id: 'fenty-tee',
     name: 'F1 Men\'s Japan',
-    price: 124.99,
+    price: 3124.99,
     rating: 4.6,
     reviews: 67,
+    category: 'clothing',
     description: 'The F1 Men\'s Japan tee is a stylish t-shirt featuring F1 racing design. Made with comfortable fabric, this tee is perfect for showing your love for Formula 1 racing.',
     features: [
       'Comfortable cotton fabric',
@@ -226,9 +240,10 @@ export const products = [
   {
     id: 'legacy-cap',
     name: 'Nike Dri-FIT Legacy91 Cap',
-    price: 24.99,
+    price: 624.99,
     rating: 4.8,
     reviews: 156,
+    category: 'accessories',
     description: 'The Nike Dri-FIT Legacy91 Cap is a classic baseball cap with modern performance features. Made with Dri-FIT technology, this cap keeps you cool and dry during activities.',
     features: [
       'Dri-FIT technology for moisture management',
@@ -248,9 +263,10 @@ export const products = [
   {
     id: 'classic-backpack',
     name: 'adidas Classic Backpack',
-    price: 45.99,
+    price: 1149.99,
     rating: 4.7,
     reviews: 124,
+    category: 'accessories',
     description: 'The adidas Classic Backpack is a versatile and durable backpack perfect for everyday use. With multiple compartments and comfortable straps, this backpack offers style and functionality.',
     features: [
       'Multiple compartments',
@@ -270,9 +286,10 @@ export const products = [
   {
     id: 'evercat-duffel',
     name: 'PUMA Evercat Transformation Duffel',
-    price: 39.99,
+    price: 999.99,
     rating: 4.5,
     reviews: 98,
+    category: 'accessories',
     description: 'The PUMA Evercat Transformation Duffel is a versatile bag that can be used as a duffel or backpack. With multiple compartments and comfortable straps, this bag offers style and functionality.',
     features: [
       'Convertible design',
@@ -292,7 +309,7 @@ export const products = [
   {
     id: 'brasilia-gymsack',
     name: 'Nike Brasilia Training Gymsack',
-    price: 19.99,
+    price: 499.99,
     rating: 4.9,
     reviews: 112,
     description: 'The Nike Brasilia Training Gymsack is a durable and spacious gym bag perfect for carrying your workout essentials. With multiple compartments and comfortable straps, this bag offers style and functionality.',
@@ -314,7 +331,7 @@ export const products = [
   {
     id: 'originals-socks',
     name: 'adidas Originals Socks 3-Pack',
-    price: 16.99,
+    price: 424.99,
     rating: 4.6,
     reviews: 89,
     description: 'The adidas Originals Socks 3-Pack includes three pairs of comfortable and stylish socks. Made with soft, breathable fabric, these socks offer comfort and style.',
@@ -336,9 +353,10 @@ export const products = [
   {
     id: 'elite-socks',
     name: 'Nike Elite Basketball Socks',
-    price: 18.99,
+    price: 474.99,
     rating: 4.7,
     reviews: 134,
+    category: 'accessories',
     description: 'The Nike Elite Basketball Socks are designed for optimal performance on the court. With cushioned support and moisture-wicking technology, these socks keep your feet comfortable during intense games.',
     features: [
       'Moisture-wicking technology',
@@ -358,9 +376,10 @@ export const products = [
   {
     id: 'pioneer-wallet',
     name: 'PUMA Pioneer Wallet',
-    price: 25.99,
+    price: 649.99,
     rating: 4.5,
     reviews: 92,
+    category: 'accessories',
     description: 'The PUMA Pioneer Wallet is a sleek and functional accessory for everyday use. With multiple card slots and a billfold compartment, this wallet combines style with practicality.',
     features: [
       'Multiple card slots',
@@ -380,9 +399,10 @@ export const products = [
   {
     id: 'training-gloves',
     name: 'adidas Training Gloves',
-    price: 29.99,
+    price: 749.99,
     rating: 4.6,
     reviews: 78,
+    category: 'accessories',
     description: 'The adidas Training Gloves provide essential protection and grip for your workout sessions. With breathable material and reinforced padding, these gloves enhance your training experience.',
     features: [
       'Breathable material',
@@ -402,9 +422,10 @@ export const products = [
   {
     id: 'resistance-band',
     name: 'Nike Resistance Band Set',
-    price: 34.99,
+    price: 874.99,
     rating: 4.8,
     reviews: 156,
+    category: 'accessories',
     description: 'The Nike Resistance Band Set includes multiple resistance levels for versatile workout options. Perfect for strength training, rehabilitation, or adding intensity to your exercises.',
     features: [
       'Multiple resistance levels',
@@ -424,9 +445,10 @@ export const products = [
   {
     id: 'performance-headband',
     name: 'PUMA Performance Headband',
-    price: 12.99,
+    price: 324.99,
     rating: 4.4,
     reviews: 112,
+    category: 'accessories',
     description: 'The PUMA Performance Headband keeps sweat away from your eyes during intense workouts. Made with moisture-wicking material and featuring a comfortable fit, this headband is essential for any active lifestyle.',
     features: [
       'Moisture-wicking material',

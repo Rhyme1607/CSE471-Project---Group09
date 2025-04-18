@@ -2,12 +2,13 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Search, Mail, Bell, User, Menu, ChevronRight, ChevronLeft, Star, Plus, LogOut, Settings } from "lucide-react"
+import { Search, Mail, Bell, User, Menu, ChevronRight, ChevronLeft, Star, Plus, LogOut, Settings, Package } from "lucide-react"
 import { useState } from "react"
 import { useUser } from './context/UserContext'
 import Footer from '../components/ui/Footer'
 import { cn } from '../lib/utils'
 import CartIcon from './components/CartIcon'
+import { products } from '@/app/utils/productUtils'
 
 // Helper function to get all products
 const getAllProducts = (shoesProducts: any[], clothingProducts: any[], accessoriesProducts: any[]) => {
@@ -87,71 +88,41 @@ export default function Home() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, logout } = useUser();
 
-  // Product data arrays
-  const shoesProducts = [
-    [
-      { id: 'samba', image: "/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png", name: "adidas Samba OG Shoes", price: 101.99, rating: 4.9 },
-      { id: 'lamelo-shoes', image: "/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men's-Basketball-Shoes-Photoroom.png", name: "PUMA x LAMELO BALL Golden Child", price: 124.99, rating: 5.0 },
-      { id: 'luka-3', image: "/JORDAN+LUKA+3 (1)-Photoroom.png", name: "Nike Air Jordan Luka 3", price: 129.99, rating: 5.0 },
-      { id: 'jordan-6-rings', image: "/JORDAN+6+RINGS-Photoroom.png", name: "Nike Air Jordan 6 Rings", price: 169.99, rating: 4.9 },
-      { id: 'jordan-1-mid', image: "/WMNS+AIR+JORDAN+1+MID-Photoroom.png", name: "Nike Air Jordan 1 Mid", price: 124.99, rating: 4.6 }
-    ],
-    [
-      { id: 'air-force-1', image: "/placeholder.svg", name: "Nike Air Force 1 '07", price: 110.99, rating: 4.8 },
-      { id: 'ultra-boost', image: "/placeholder.svg", name: "adidas Ultra Boost", price: 180.99, rating: 4.9 },
-      { id: 'rs-x', image: "/placeholder.svg", name: "PUMA RS-X", price: 85.99, rating: 4.7 },
-      { id: 'dunk-low', image: "/placeholder.svg", name: "Nike Dunk Low", price: 115.99, rating: 4.8 },
-      { id: 'nmd-r1', image: "/placeholder.svg", name: "adidas NMD R1", price: 140.99, rating: 4.7 }
-    ]
-  ];
+  // Filter products by category
+  const shoesProducts = products.filter(product => product.category === 'shoes');
+  const clothingProducts = products.filter(product => product.category === 'clothing');
+  const accessoriesProducts = products.filter(product => product.category === 'accessories');
 
-  const clothingProducts = [
-    [
-      { id: 'adidas-shorts', image: "/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png", name: "adidas Black Shorts Sports", price: 101.99, rating: 4.9 },
-      { id: 'adidas-pants', image: "/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png", name: "Tiro 24 Training Pants", price: 124.99, rating: 5.0 },
-      { id: 'adidas-hoodie', image: "/New_York_Red_Bulls_UBP_Travel_Hoodie_Red_JE5524_01_laydown-Photoroom.png", name: "adidas NY Bulls Red Hoodie", price: 79.99, rating: 4.8 },
-      { id: 'puma-tee', image: "/ESS-No.-1-Logo-Men's-Tee-Photoroom.png", name: "PUMA Blue Tee", price: 169.99, rating: 4.9 },
-      { id: 'fenty-tee', image: "/F1®-Japan-Men's-Tee-Photoroom.png", name: "F1 Men's Japan", price: 124.99, rating: 4.6 }
-    ],
-    [
-      { id: 'dri-fit', image: "/placeholder.svg", name: "Nike Dri-FIT Training Shirt", price: 34.99, rating: 4.7 },
-      { id: 'track-jacket', image: "/placeholder.svg", name: "adidas Essentials Track Jacket", price: 65.99, rating: 4.8 },
-      { id: 'downtown-hoodie', image: "/placeholder.svg", name: "PUMA Downtown Hoodie", price: 89.99, rating: 4.6 },
-      { id: 'tech-fleece', image: "/placeholder.svg", name: "Nike Tech Fleece Joggers", price: 110.99, rating: 4.9 },
-      { id: 'originals-tee', image: "/placeholder.svg", name: "adidas Originals Tee", price: 29.99, rating: 4.7 }
-    ]
-  ];
+  // Split products into pages of 5 items each
+  const shoesPages = [];
+  const clothingPages = [];
+  const accessoriesPages = [];
 
-  const accessoriesProducts = [
-    [
-      { id: 'legacy-cap', image: "/placeholder.svg", name: "Nike Dri-FIT Legacy91 Cap", price: 24.99, rating: 4.8 },
-      { id: 'classic-backpack', image: "/placeholder.svg", name: "adidas Classic Backpack", price: 45.99, rating: 4.7 },
-      { id: 'evercat-duffel', image: "/placeholder.svg", name: "PUMA Evercat Transformation Duffel", price: 39.99, rating: 4.5 },
-      { id: 'brasilia-gymsack', image: "/placeholder.svg", name: "Nike Brasilia Training Gymsack", price: 19.99, rating: 4.9 },
-      { id: 'originals-socks', image: "/placeholder.svg", name: "adidas Originals Socks 3-Pack", price: 16.99, rating: 4.6 }
-    ],
-    [
-      { id: 'elite-socks', image: "/placeholder.svg", name: "Nike Elite Basketball Socks", price: 18.99, rating: 4.7 },
-      { id: 'pioneer-wallet', image: "/placeholder.svg", name: "PUMA Pioneer Wallet", price: 25.99, rating: 4.5 },
-      { id: 'training-gloves', image: "/placeholder.svg", name: "adidas Training Gloves", price: 29.99, rating: 4.6 },
-      { id: 'resistance-band', image: "/placeholder.svg", name: "Nike Resistance Band Set", price: 34.99, rating: 4.8 },
-      { id: 'performance-headband', image: "/placeholder.svg", name: "PUMA Performance Headband", price: 12.99, rating: 4.4 }
-    ]
-  ];
+  for (let i = 0; i < shoesProducts.length; i += 5) {
+    shoesPages.push(shoesProducts.slice(i, i + 5));
+  }
+
+  for (let i = 0; i < clothingProducts.length; i += 5) {
+    clothingPages.push(clothingProducts.slice(i, i + 5));
+  }
+
+  for (let i = 0; i < accessoriesProducts.length; i += 5) {
+    accessoriesPages.push(accessoriesProducts.slice(i, i + 5));
+  }
 
   // Get all products for search
-  const allProducts = getAllProducts(shoesProducts, clothingProducts, accessoriesProducts);
+  const allProducts = products;
 
   const handleNextPage = (section: 'shoes' | 'clothing' | 'accessories') => {
     switch(section) {
       case 'shoes':
-        if (currentShoesPage < shoesProducts.length - 1) setCurrentShoesPage(prev => prev + 1);
+        if (currentShoesPage < shoesPages.length - 1) setCurrentShoesPage(prev => prev + 1);
         break;
       case 'clothing':
-        if (currentClothingPage < clothingProducts.length - 1) setCurrentClothingPage(prev => prev + 1);
+        if (currentClothingPage < clothingPages.length - 1) setCurrentClothingPage(prev => prev + 1);
         break;
       case 'accessories':
-        if (currentAccessoriesPage < accessoriesProducts.length - 1) setCurrentAccessoriesPage(prev => prev + 1);
+        if (currentAccessoriesPage < accessoriesPages.length - 1) setCurrentAccessoriesPage(prev => prev + 1);
         break;
     }
   };
@@ -205,7 +176,7 @@ export default function Home() {
               <Link href="/browse" className="font-medium text-white">
                 Browse
               </Link>
-              <Link href="#" className="font-medium text-white">
+              <Link href="/contact" className="font-medium text-white">
                 Contact
               </Link>
               {!user && (
@@ -213,7 +184,7 @@ export default function Home() {
                   Sign Up
                 </Link>
               )}
-              <Link href="#" className="font-medium text-white">
+              <Link href="/about" className="font-medium text-white">
                 About Us
               </Link>
             </nav>
@@ -270,6 +241,14 @@ export default function Home() {
                     >
                       <Settings className="w-4 h-4" />
                       Manage Profile
+                    </Link>
+                    
+                    <Link 
+                      href="/orders"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Package className="w-4 h-4" />
+                      Order History
                     </Link>
                     
                     <button
@@ -399,11 +378,11 @@ export default function Home() {
             <div className="flex">
               <div className="relative w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {shoesProducts[currentShoesPage].map((product, index) => (
+                  {shoesPages[currentShoesPage].map((product, index) => (
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -419,7 +398,7 @@ export default function Home() {
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                 )}
-                {currentShoesPage < shoesProducts.length - 1 && (
+                {currentShoesPage < shoesPages.length - 1 && (
                   <button
                     onClick={() => handleNextPage('shoes')}
                     className="absolute -right-6 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-md p-2 z-20 hover:bg-gray-50"
@@ -444,11 +423,11 @@ export default function Home() {
             <div className="flex">
               <div className="relative w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {clothingProducts[currentClothingPage].map((product, index) => (
+                  {clothingPages[currentClothingPage].map((product, index) => (
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -464,7 +443,7 @@ export default function Home() {
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                 )}
-                {currentClothingPage < clothingProducts.length - 1 && (
+                {currentClothingPage < clothingPages.length - 1 && (
                   <button
                     onClick={() => handleNextPage('clothing')}
                     className="absolute -right-6 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-md p-2 z-10 hover:bg-gray-50"
@@ -489,11 +468,11 @@ export default function Home() {
             <div className="flex">
               <div className="relative w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {accessoriesProducts[currentAccessoriesPage].map((product, index) => (
+                  {accessoriesPages[currentAccessoriesPage].map((product, index) => (
                     <ProductCard
                       key={index}
                       id={product.id}
-                      image={product.image}
+                      images={product.images}
                       name={product.name}
                       price={product.price}
                       rating={product.rating}
@@ -509,7 +488,7 @@ export default function Home() {
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                 )}
-                {currentAccessoriesPage < accessoriesProducts.length - 1 && (
+                {currentAccessoriesPage < accessoriesPages.length - 1 && (
                   <button
                     onClick={() => handleNextPage('accessories')}
                     className="absolute -right-6 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-md p-2 z-10 hover:bg-gray-50"
@@ -620,20 +599,20 @@ export default function Home() {
 
 interface ProductCardProps {
   id: string;
-  image: string;
+  images: string[];
   name: string;
   price: number;
   rating: number;
   className?: string;
 }
 
-const ProductCard = ({ id, image, name, price, rating, className }: ProductCardProps) => {
+const ProductCard = ({ id, images, name, price, rating, className }: ProductCardProps) => {
   return (
     <Link href={`/product/${id}`} className={cn('group', className)}>
       <div className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300">
         <div className="relative aspect-square">
           <Image
-            src={image}
+            src={images[0]}
             alt={name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -641,7 +620,7 @@ const ProductCard = ({ id, image, name, price, rating, className }: ProductCardP
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-gray-800 truncate">{name}</h3>
-          <p className="font-bold text-teal-600 mt-1">${price.toFixed(2)}</p>
+          <p className="font-bold text-teal-600 mt-1">৳{price.toFixed(2)}</p>
           <div className="flex items-center mt-2">
             <div className="flex text-yellow-400">
               {Array(5)

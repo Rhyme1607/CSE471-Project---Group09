@@ -162,7 +162,7 @@ export default function ProductPage() {
               <Link href="/contact" className="text-gray-600 hover:text-teal-600 font-bold">
                 Contact
               </Link>
-              <Link href="/about-us" className="text-gray-600 hover:text-teal-600 font-bold">
+              <Link href="/about" className="text-gray-600 hover:text-teal-600 font-bold">
                 About Us
               </Link>
             </nav>
@@ -257,7 +257,13 @@ export default function ProductPage() {
           {/* Product Images */}
           <div className="space-y-4">
             {show3DModel ? (
-              <IframeModelViewer modelUrl={get3DModelUrl(product.name)} />
+              get3DModelUrl(product.name) ? (
+                <IframeModelViewer modelUrl={get3DModelUrl(product.name) as string} />
+              ) : (
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <p className="text-gray-500">3D model not available for this product</p>
+                </div>
+              )
             ) : (
               <>
                 <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
@@ -324,7 +330,7 @@ export default function ProductPage() {
             </div>
 
             <div className="text-2xl font-bold text-teal-600">
-              ${product.price.toFixed(2)}
+              ৳{product.price.toFixed(2)}
             </div>
 
             <div className="space-y-4">
@@ -434,12 +440,22 @@ export default function ProductPage() {
                     onChange={(e) => setQuantity(parseInt(e.target.value))}
                     className="w-20"
                   />
-                  <Button 
-                    className="flex-1"
-                    onClick={handleAddToCart}
-                  >
-                    {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
-                  </Button>
+                  <div className="flex-1 flex gap-2">
+                    <Button 
+                      className="flex-1"
+                      onClick={handleAddToCart}
+                    >
+                      {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
+                    </Button>
+                    <Link href={`/customize/${product.id}`}>
+                      <Button 
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Customize
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -447,7 +463,7 @@ export default function ProductPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Truck className="w-5 h-5" />
-                <span>Free shipping on orders over $100</span>
+                <span>Free shipping on orders over ৳10000</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <RotateCcw className="w-5 h-5" />
@@ -502,7 +518,7 @@ export default function ProductPage() {
                     {item.name}
                   </h3>
                   <div className="flex items-center justify-between">
-                    <p className="text-gray-900">${item.price.toFixed(2)}</p>
+                    <p className="text-gray-900">৳{item.price.toFixed(2)}</p>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       <span className="text-sm text-gray-600">{item.rating}</span>

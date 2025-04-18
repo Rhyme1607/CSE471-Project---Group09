@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import { Button } from '@/components/ui/button';
-import { Trash2, ArrowLeft, ShoppingBag, User, Settings, LogOut } from 'lucide-react';
+import { Trash2, ArrowLeft, ShoppingBag, User, Settings, LogOut, Package } from 'lucide-react';
 import Footer from '@/components/ui/Footer';
 import { useUser } from '../context/UserContext';
 import CartIcon from '../components/CartIcon';
@@ -21,6 +21,14 @@ export default function CartPage() {
     logout();
     setIsProfileOpen(false);
     router.push('/login');
+  };
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    } else {
+      router.push('/checkout');
+    }
   };
 
   return (
@@ -94,6 +102,14 @@ export default function CartPage() {
                       Manage Profile
                     </Link>
                     
+                    <Link 
+                      href="/orders"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Package className="w-4 h-4" />
+                      Order History
+                    </Link>
+                    
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full"
@@ -149,10 +165,10 @@ export default function CartPage() {
                       <div className="flex-1">
                         <div className="flex justify-between">
                           <h3 className="font-medium">{item.name}</h3>
-                          <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-semibold">৳{(item.price * item.quantity).toFixed(2)}</p>
                         </div>
                         <p className="text-sm text-gray-600 mb-2">
-                          ${item.price.toFixed(2)} each
+                          ৳{item.price.toFixed(2)} each
                         </p>
                         {item.size && (
                           <p className="text-sm text-gray-600">
@@ -214,7 +230,7 @@ export default function CartPage() {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${totalPrice.toFixed(2)}</span>
+                    <span className="font-medium">৳{Number(totalPrice).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
@@ -222,10 +238,13 @@ export default function CartPage() {
                   </div>
                   <div className="border-t pt-3 flex justify-between font-semibold">
                     <span>Total</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>৳{Number(totalPrice).toFixed(2)}</span>
                   </div>
                 </div>
-                <Button className="w-full bg-teal-600 hover:bg-teal-700">
+                <Button 
+                  className="w-full bg-teal-600 hover:bg-teal-700"
+                  onClick={handleCheckout}
+                >
                   Proceed to Checkout
                 </Button>
                 <p className="text-xs text-gray-500 mt-4 text-center">

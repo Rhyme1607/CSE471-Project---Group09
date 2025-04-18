@@ -5,7 +5,7 @@ import { useUser } from '../context/UserContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Camera, Mail, Phone, MapPin, Calendar, Edit2, Save, X } from 'lucide-react';
+import { Camera, Mail, Phone, MapPin, Calendar, Edit2, Save, X, Package } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -14,6 +14,43 @@ interface FormData {
   phone: string;
   address: string;
   birthdate: Date | null;
+  shippingAddress?: {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+}
+
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  size: string;
+  color: string;
+  image: string;
+}
+
+interface Order {
+  _id: string;
+  orderNumber: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: 'PENDING' | 'SHIPPED' | 'DELIVERED';
+  createdAt: string;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 }
 
 export default function Profile() {
@@ -27,10 +64,22 @@ export default function Profile() {
     bio: user?.bio || '',
     phone: user?.phone || '',
     address: user?.address || '',
-    birthdate: user?.birthdate ? new Date(user.birthdate) : null
+    birthdate: user?.birthdate ? new Date(user.birthdate) : null,
+    shippingAddress: user?.shippingAddress || {
+      fullName: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'Bangladesh'
+    }
   });
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [orderError, setOrderError] = useState('');
 
   // Update form data when user data changes
   useEffect(() => {
@@ -39,10 +88,48 @@ export default function Profile() {
         bio: user.bio || '',
         phone: user.phone || '',
         address: user.address || '',
-        birthdate: user.birthdate ? new Date(user.birthdate) : null
+        birthdate: user.birthdate ? new Date(user.birthdate) : null,
+        shippingAddress: user.shippingAddress || {
+          fullName: '',
+          phone: '',
+          address: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: 'Bangladesh'
+        }
       });
     }
   }, [user]);
+
+  // Fetch orders when component mounts
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!token) return;
+      
+      try {
+        const response = await fetch('/api/orders/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+
+        const data = await response.json();
+        setOrders(data.orders);
+      } catch (err) {
+        setOrderError('Failed to load orders');
+        console.error('Error fetching orders:', err);
+      } finally {
+        setIsLoadingOrders(false);
+      }
+    };
+
+    fetchOrders();
+  }, [token]);
 
   if (!user) {
     router.push('/login');
@@ -85,7 +172,8 @@ export default function Profile() {
           bio: formData.bio,
           phone: formData.phone,
           address: formData.address,
-          birthdate: formData.birthdate ? formData.birthdate.toISOString() : undefined
+          birthdate: formData.birthdate ? formData.birthdate.toISOString() : undefined,
+          shippingAddress: formData.shippingAddress
         });
       }
 
@@ -146,6 +234,17 @@ export default function Profile() {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'DELIVERED':
+        return 'bg-green-100 text-green-800';
+      case 'SHIPPED':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -164,16 +263,16 @@ export default function Profile() {
                 <span className="text-xl font-bold text-teal-800">GenWear</span>
               </Link>
               <nav className="hidden md:flex items-center gap-8">
-                <Link href="/" className="font-medium text-gray-700 hover:text-teal-600">
+                <Link href="/" className="text-gray-600 hover:text-teal-600 font-bold">
                   Home
                 </Link>
-                <Link href="/browse" className="font-medium text-gray-700 hover:text-teal-600">
+                <Link href="/browse" className="text-gray-600 hover:text-teal-600 font-bold">
                   Browse
                 </Link>
-                <Link href="#" className="font-medium text-gray-700 hover:text-teal-600">
+                <Link href="/contact" className="text-gray-600 hover:text-teal-600 font-bold">
                   Contact
                 </Link>
-                <Link href="#" className="font-medium text-gray-700 hover:text-teal-600">
+                <Link href="/about" className="text-gray-600 hover:text-teal-600 font-bold">
                   About Us
                 </Link>
               </nav>
@@ -358,7 +457,16 @@ export default function Profile() {
                             bio: user?.bio || '',
                             phone: user?.phone || '',
                             address: user?.address || '',
-                            birthdate: user?.birthdate ? new Date(user.birthdate) : null
+                            birthdate: user?.birthdate ? new Date(user.birthdate) : null,
+                            shippingAddress: user?.shippingAddress || {
+                              fullName: '',
+                              phone: '',
+                              address: '',
+                              city: '',
+                              state: '',
+                              zipCode: '',
+                              country: 'Bangladesh'
+                            }
                           });
                         }}
                         className="text-gray-600 hover:text-gray-700"
@@ -397,7 +505,7 @@ export default function Profile() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-teal-50 rounded-lg p-4">
                   <p className="text-sm text-teal-600 mb-1">Orders</p>
-                  <p className="text-2xl font-bold text-teal-700">12</p>
+                  <p className="text-2xl font-bold text-teal-700">{orders.length}</p>
                 </div>
                 <div className="bg-teal-50 rounded-lg p-4">
                   <p className="text-sm text-teal-600 mb-1">Reviews</p>
@@ -410,6 +518,237 @@ export default function Profile() {
                 <div className="bg-teal-50 rounded-lg p-4">
                   <p className="text-sm text-teal-600 mb-1">Points</p>
                   <p className="text-2xl font-bold text-teal-700">450</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Order History Section */}
+            <div className="mt-12">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold text-gray-900">Order History</h2>
+                <Link 
+                  href="/orders" 
+                  className="text-teal-600 hover:text-teal-700 text-sm font-medium"
+                >
+                  View All Orders
+                </Link>
+              </div>
+
+              {isLoadingOrders ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-600"></div>
+                </div>
+              ) : orderError ? (
+                <div className="bg-red-100 text-red-700 p-4 rounded-lg">
+                  {orderError}
+                </div>
+              ) : orders.length === 0 ? (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">No orders yet</h3>
+                  <p className="text-gray-600 mb-4">Start shopping to see your orders here</p>
+                  <Link 
+                    href="/browse"
+                    className="inline-block bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition-colors"
+                  >
+                    Browse Products
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {orders.slice(0, 3).map((order) => (
+                    <div
+                      key={order._id}
+                      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
+                    >
+                      <div className="p-4">
+                        <div className="flex flex-wrap justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-base font-semibold text-gray-900 mb-1">
+                              Order #{order.orderNumber}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              Placed on {new Date(order.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </div>
+
+                        <div className="space-y-3">
+                          {order.items.slice(0, 2).map((item, index) => (
+                            <div key={index} className="flex items-center space-x-3">
+                              <div className="relative w-16 h-16 flex-shrink-0">
+                                <Image
+                                  src={item.image}
+                                  alt={item.name}
+                                  fill
+                                  className="object-cover rounded-md"
+                                />
+                              </div>
+                              <div className="flex-grow">
+                                <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                                <p className="text-xs text-gray-500">
+                                  Size: {item.size} • Color: {item.color}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  Quantity: {item.quantity} × ৳{item.price}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                          {order.items.length > 2 && (
+                            <p className="text-sm text-gray-500 text-center">
+                              +{order.items.length - 2} more items
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                          <div>
+                            <p className="text-xs text-gray-600">Total Amount:</p>
+                            <p className="text-sm font-semibold text-gray-900">৳{order.totalAmount}</p>
+                          </div>
+                          <Link 
+                            href={`/orders?order=${order._id}`}
+                            className="text-teal-600 hover:text-teal-700 text-sm font-medium"
+                          >
+                            View Details
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Shipping Address */}
+            <div className="mt-12">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Shipping Address</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <input
+                    type="text"
+                    value={formData.shippingAddress?.fullName || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      shippingAddress: {
+                        ...formData.shippingAddress!,
+                        fullName: e.target.value
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    disabled={!isEditing}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Phone</label>
+                  <input
+                    type="tel"
+                    value={formData.shippingAddress?.phone || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      shippingAddress: {
+                        ...formData.shippingAddress!,
+                        phone: e.target.value
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    disabled={!isEditing}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Address</label>
+                  <input
+                    type="text"
+                    value={formData.shippingAddress?.address || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      shippingAddress: {
+                        ...formData.shippingAddress!,
+                        address: e.target.value
+                      }
+                    })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    disabled={!isEditing}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">City</label>
+                    <input
+                      type="text"
+                      value={formData.shippingAddress?.city || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shippingAddress: {
+                          ...formData.shippingAddress!,
+                          city: e.target.value
+                        }
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">State</label>
+                    <input
+                      type="text"
+                      value={formData.shippingAddress?.state || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shippingAddress: {
+                          ...formData.shippingAddress!,
+                          state: e.target.value
+                        }
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      disabled={!isEditing}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">ZIP Code</label>
+                    <input
+                      type="text"
+                      value={formData.shippingAddress?.zipCode || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shippingAddress: {
+                          ...formData.shippingAddress!,
+                          zipCode: e.target.value
+                        }
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Country</label>
+                    <input
+                      type="text"
+                      value={formData.shippingAddress?.country || 'Bangladesh'}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        shippingAddress: {
+                          ...formData.shippingAddress!,
+                          country: e.target.value
+                        }
+                      })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      disabled={!isEditing}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

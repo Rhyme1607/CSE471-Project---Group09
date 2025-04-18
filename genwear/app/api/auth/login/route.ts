@@ -75,7 +75,8 @@ export async function POST(request: Request) {
         bio: user.bio,
         phone: user.phone,
         address: user.address,
-        birthdate: user.birthdate
+        birthdate: user.birthdate,
+        shippingAddress: user.shippingAddress
       },
       token
     });

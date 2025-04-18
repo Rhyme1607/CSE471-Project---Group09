@@ -137,8 +137,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   // Calculate total items
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   
-  // Calculate total price
-  const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  // Calculate total price with 2 decimal places
+  const totalPrice = Number(items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2));
   
   // Add item to cart
   const addItem = (newItem: CartItem) => {

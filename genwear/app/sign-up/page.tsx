@@ -42,23 +42,18 @@ export default function SignUp() {
     }
 
     try {
-      const success = await signup({
+      await signup({
         name: formData.name,
         email: formData.email,
         password: formData.password,
       });
-
-      if (success) {
-        setShowSuccess(true);
-        // Delay redirect to show success message
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
-      } else {
-        setError('Failed to create account. Email may already be in use.');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account');
+      setShowSuccess(true);
+      // Delay redirect to show success message
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create account');
     } finally {
       setLoading(false);
     }

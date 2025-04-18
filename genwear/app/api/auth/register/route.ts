@@ -43,6 +43,15 @@ export async function POST(request: Request) {
       name,
       email,
       password: hashedPassword,
+      shippingAddress: {
+        fullName: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'Bangladesh'
+      },
       createdAt: new Date(),
     });
 
