@@ -502,22 +502,15 @@ export default function Profile() {
             {/* Activity Stats */}
             <div className="mt-12">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Activity</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-teal-50 rounded-lg p-4">
                   <p className="text-sm text-teal-600 mb-1">Orders</p>
                   <p className="text-2xl font-bold text-teal-700">{orders.length}</p>
                 </div>
                 <div className="bg-teal-50 rounded-lg p-4">
-                  <p className="text-sm text-teal-600 mb-1">Reviews</p>
-                  <p className="text-2xl font-bold text-teal-700">8</p>
-                </div>
-                <div className="bg-teal-50 rounded-lg p-4">
-                  <p className="text-sm text-teal-600 mb-1">Wishlist</p>
-                  <p className="text-2xl font-bold text-teal-700">15</p>
-                </div>
-                <div className="bg-teal-50 rounded-lg p-4">
                   <p className="text-sm text-teal-600 mb-1">Points</p>
-                  <p className="text-2xl font-bold text-teal-700">450</p>
+                  <p className="text-2xl font-bold text-teal-700">{user?.points || 0}</p>
+                  <p className="text-xs text-teal-600 mt-1">1 point per 10 taka spent</p>
                 </div>
               </div>
             </div>

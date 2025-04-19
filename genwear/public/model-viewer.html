@@ -248,9 +248,6 @@
         <div class="tab active" data-tab="color">
           <span>Color</span>
         </div>
-        <div class="tab" data-tab="logo">
-          <span>Logo</span>
-        </div>
         <div class="tab" data-tab="full">
           <span>Full Texture</span>
         </div>
@@ -276,17 +273,6 @@
         </div>
       </div>
       
-      <div class="tab-content" id="logo-content" style="display: none;">
-        <div class="size-controls">
-          <label for="logoSize">Logo Size:</label>
-          <input type="range" id="logoSize" min="0.1" max="1.0" step="0.05" value="0.5">
-          <label for="logoCurve">Curve Amount:</label>
-          <input type="range" id="logoCurve" min="0.05" max="0.5" step="0.05" value="0.2">
-          <button id="uploadLogo">Upload Logo</button>
-          <input type="file" id="logoFile" accept="image/*" style="display: none;">
-        </div>
-      </div>
-      
       <div class="tab-content" id="full-content" style="display: none;">
         <div class="size-controls">
           <button id="uploadFull">Upload Full Texture</button>
@@ -295,23 +281,7 @@
       </div>
     </div>
     
-    <div class="placement-instructions">
-      Click on the model to place the logo
-    </div>
-    
-    <div class="image-controls">
-      <button id="removeLastImage">Remove Last Image</button>
-      <button id="removeAllImages">Remove All Images</button>
-    </div>
-    
     <button id="resetModel" class="reset-button">Reset Model</button>
-    
-    <div class="filter-tabs">
-      <div class="filter-tab active" data-filter="logo">Logo</div>
-      <div class="filter-tab" data-filter="full">Full Texture</div>
-    </div>
-    
-    <div id="previewImage" class="preview-image"></div>
   </div>
 
   <script>
@@ -331,6 +301,7 @@
     let isLogoTexture = true;
     let isFullTexture = false;
     let previewElement = null;
+    let originalModelColor = null;
 
     // Initialize the scene
     function init() {
@@ -411,17 +382,6 @@
             t.classList.remove('active');
           });
           tab.classList.add('active');
-          
-          // If logo tab is selected, show placement instructions
-          if (tabName === 'logo' && currentLogoUrl) {
-            isPlacementMode = true;
-            document.querySelector('.placement-instructions').style.display = 'block';
-            document.getElementById('previewImage').style.display = 'block';
-          } else {
-            isPlacementMode = false;
-            document.querySelector('.placement-instructions').style.display = 'none';
-            document.getElementById('previewImage').style.display = 'none';
-          }
         });
       });
       
@@ -441,59 +401,12 @@
         });
       });
       
-      // Logo size and curve controls
-      document.getElementById('logoSize').addEventListener('input', function(e) {
-        logoSize = parseFloat(e.target.value);
-      });
-      
-      document.getElementById('logoCurve').addEventListener('input', function(e) {
-        logoCurve = parseFloat(e.target.value);
-      });
-      
-      // Upload buttons
-      document.getElementById('uploadLogo').addEventListener('click', function() {
-        document.getElementById('logoFile').click();
-      });
-      
+      // Upload button for full texture
       document.getElementById('uploadFull').addEventListener('click', function() {
         document.getElementById('fullFile').click();
       });
       
-      // File inputs
-      document.getElementById('logoFile').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            currentLogoUrl = event.target.result;
-            isPlacementMode = true;
-            document.querySelector('.placement-instructions').style.display = 'block';
-            
-            // Set up preview image
-            const previewImage = document.getElementById('previewImage');
-            previewImage.style.backgroundImage = `url(${currentLogoUrl})`;
-            previewImage.style.display = 'block';
-            
-            // Switch to logo tab
-            document.querySelectorAll('.tab').forEach(t => {
-              t.classList.remove('active');
-            });
-            document.querySelector('.tab[data-tab="logo"]').classList.add('active');
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-              content.style.display = 'none';
-            });
-            document.getElementById('logo-content').style.display = 'block';
-            
-            // Notify parent
-            window.parent.postMessage({ type: 'textureReady' }, '*');
-            
-            console.log('Logo uploaded and ready for placement');
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      
+      // File input for full texture
       document.getElementById('fullFile').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
@@ -514,10 +427,6 @@
           reader.readAsDataURL(file);
         }
       });
-      
-      // Image controls
-      document.getElementById('removeLastImage').addEventListener('click', removeLastImage);
-      document.getElementById('removeAllImages').addEventListener('click', removeAllImages);
       
       // Reset model button
       document.getElementById('resetModel').addEventListener('click', resetModel);
@@ -556,6 +465,14 @@
           model = gltf.scene;
           scene.add(model);
 
+          // Store original materials
+          model.traverse(function(child) {
+            if (child.isMesh) {
+              // Clone the original material to preserve it
+              child.userData.originalMaterial = child.material.clone();
+            }
+          });
+
           // Center the model
           const box = new THREE.Box3().setFromObject(model);
           const center = box.getCenter(new THREE.Vector3());
@@ -573,6 +490,13 @@
           // Apply current color if exists
           if (currentColor) {
             applyColor(currentColor);
+          } else {
+            // If no color is selected, use original materials
+            model.traverse(function(child) {
+              if (child.isMesh && child.userData.originalMaterial) {
+                child.material = child.userData.originalMaterial.clone();
+              }
+            });
           }
 
           // Apply current textures if exist
@@ -610,35 +534,53 @@
         if (child.isDecal) {
           model.remove(child);
         }
+        if (child.isMesh) {
+          // Reset to original material if no custom color is set
+          if (!currentColor && child.userData.originalMaterial) {
+            child.material = child.userData.originalMaterial.clone();
+          } else {
+            // Create new material with custom color
+            child.material = new THREE.MeshPhongMaterial({
+              color: currentColor || 0xffffff,
+              map: null,
+              transparent: true
+            });
+          }
+        }
       });
       
       // Apply full texture if enabled
       if (isFullTexture && currentFullUrl) {
+        // Create a new texture loader
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Load the texture with error handling
         textureLoader.load(
           currentFullUrl,
           function(texture) {
-            const decalGeometry = new THREE.DecalGeometry(
-              model,
-              new THREE.Vector3(0, 0, 0),
-              new THREE.Euler(0, 0, 0),
-              new THREE.Vector3(1, 1, 1)
-            );
-            
-            const decalMaterial = new THREE.MeshPhongMaterial({
-              map: texture,
-              transparent: true,
-              depthTest: true,
-              depthWrite: false,
-              polygonOffset: true,
-              polygonOffsetFactor: -4,
-              side: THREE.DoubleSide
+            // Apply texture to all meshes in the model
+            model.traverse(function(child) {
+              if (child.isMesh) {
+                // Create new material with the texture
+                child.material = new THREE.MeshPhongMaterial({
+                  map: texture,
+                  color: currentColor || 0xffffff,
+                  transparent: true
+                });
+                
+                // Ensure proper UV mapping
+                if (child.geometry.attributes.uv) {
+                  child.geometry.attributes.uv.needsUpdate = true;
+                }
+              }
             });
             
-            const decalMesh = new THREE.Mesh(decalGeometry, decalMaterial);
-            decalMesh.isDecal = true;
-            model.add(decalMesh);
-            
             window.parent.postMessage({ type: 'textureApplied', isFull: true }, '*');
+          },
+          undefined,
+          function(error) {
+            console.error('Error loading texture:', error);
+            showError('Error loading the texture. Please try again.');
           }
         );
       }
@@ -785,9 +727,46 @@
     }
 
     function resetModel() {
+      // Reset all state variables
+      currentColor = null;
+      currentLogoUrl = null;
+      currentFullUrl = null;
+      isPlacementMode = false;
+      isLogoTexture = true;
+      isFullTexture = false;
+      placedImages = [];
+      
+      // Clear the file inputs
+      document.getElementById('fullFile').value = '';
+      
+      // Hide placement instructions and preview
+      document.querySelector('.placement-instructions').style.display = 'none';
+      document.getElementById('previewImage').style.display = 'none';
+      
+      // Reset to color tab
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('active');
+      });
+      document.querySelector('.tab[data-tab="color"]').classList.add('active');
+      
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = 'none';
+      });
+      document.getElementById('color-content').style.display = 'block';
+      
+      // Reset color options
+      document.querySelectorAll('.color-option').forEach(opt => {
+        opt.classList.remove('active');
+      });
+      document.querySelector('.color-option[data-color="#EFBD48"]').classList.add('active');
+      
+      // Reload the model to restore original materials
       if (currentModelUrl) {
         loadModel(currentModelUrl);
       }
+      
+      // Notify parent
+      window.parent.postMessage({ type: 'modelReset' }, '*');
     }
 
     function removeLastImage() {

@@ -13,13 +13,13 @@ import Footer from '@/components/ui/Footer';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, discountCode, discountAmount, clearCart } = useCart();
   const { user, isAuthenticated, isLoading, token, updateUser } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
+    fullName: user?.name || '',
     email: user?.email || '',
     phone: '',
     address: '',
@@ -49,17 +49,12 @@ export default function CheckoutPage() {
     // Wait for authentication state to be loaded
     if (isLoading) return;
 
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
     // Check if cart exists in localStorage
     const savedCart = localStorage.getItem('cart');
     if (!savedCart || JSON.parse(savedCart).length === 0) {
       router.push('/cart');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isLoading, router]);
 
   // Update form data when user data changes
   useEffect(() => {
@@ -110,9 +105,9 @@ export default function CheckoutPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError('');
-    
+
     try {
-      // Create order in database
+      // Create order
       const response = await fetch('/api/orders/create', {
         method: 'POST',
         headers: {
@@ -120,78 +115,38 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           token,
-          items: items.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size,
-            color: item.color,
-            image: item.image
-          })),
+          items: items,
           totalAmount: totalPrice,
           shippingAddress: {
             fullName: formData.fullName,
+            email: formData.email,
             phone: formData.phone,
             address: formData.address,
             city: formData.city,
             state: formData.state,
             zipCode: formData.zipCode,
-            country: formData.country
+            country: formData.country,
           },
-          paymentMethod: formData.paymentMethod
-        })
+          paymentMethod: formData.paymentMethod,
+        }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create order');
+        throw new Error(data.error || 'Failed to create order');
       }
 
-      // Save shipping address to user profile
-      if (user && token) {
-        const shippingAddress = {
-          fullName: formData.fullName,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
-          country: formData.country
-        };
-
-        const profileResponse = await fetch('/api/profile/update', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token,
-            shippingAddress
-          })
-        });
-
-        if (profileResponse.ok) {
-          // Update the user context with the new shipping address
-          updateUser({
-            ...user,
-            shippingAddress
-          });
-        }
-      }
-      
-      // Clear the cart
-      clearCart();
-      
-      // Show success modal
+      // Show success modal first
       setShowSuccessModal(true);
 
-      // Redirect to orders page after 3 seconds
+      // Wait for 2 seconds before clearing cart and redirecting
       setTimeout(() => {
-        router.push('/orders');
-      }, 3000);
-    } catch (error) {
-      console.error('Error processing order:', error);
-      setSubmitError('Failed to process your order. Please try again.');
+        clearCart();
+        router.push('/');
+      }, 2000);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -205,6 +160,20 @@ export default function CheckoutPage() {
     // Implement logout functionality
     console.log('Logging out');
   };
+
+  if (items.length === 0 && !showSuccessModal) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+        <button
+          onClick={() => router.push('/browse')}
+          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          Continue Shopping
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -245,7 +214,7 @@ export default function CheckoutPage() {
                 transition={{ delay: 0.4 }}
                 className="text-gray-600 mb-6"
               >
-                Thank you for your purchase. Redirecting to your orders...
+                Thank you for your purchase. Redirecting to home page...
               </motion.p>
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
@@ -580,27 +549,33 @@ export default function CheckoutPage() {
                           {item.color && ` • Color: ${item.color}`}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Qty: {item.quantity} × ৳{item.price}
+                          Qty: {item.quantity} × ৳{item.price.toFixed(2)}
                         </p>
                       </div>
                       <div className="text-sm font-medium text-gray-800">
-                        ৳{item.price * item.quantity}
+                        ৳{(item.price * item.quantity).toFixed(2)}
                       </div>
                     </div>
                   ))}
 
-                  <div className="border-t border-gray-200 pt-4 mt-4">
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <div className="space-y-3 pt-4 border-t">
+                    <div className="flex justify-between text-sm text-gray-600">
                       <span>Subtotal</span>
-                      <span>৳{totalPrice}</span>
+                      <span>৳{(totalPrice + discountAmount).toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                    {discountAmount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Discount ({discountCode})</span>
+                        <span>-৳{discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-sm text-gray-600">
                       <span>Shipping</span>
                       <span>Free</span>
                     </div>
-                    <div className="flex justify-between text-base font-semibold text-gray-800 mt-4">
+                    <div className="flex justify-between text-base font-semibold text-gray-800 pt-3 border-t">
                       <span>Total</span>
-                      <span>৳{totalPrice}</span>
+                      <span>৳{totalPrice.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

@@ -7,12 +7,6 @@ export async function POST(req: Request) {
   try {
     const { token, items, totalAmount, shippingAddress, paymentMethod } = await req.json();
 
-    // Verify token and get user
-    const user = await verifyToken(token);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     // Connect to database
     const { db } = await connectToDatabase();
 
@@ -27,9 +21,8 @@ export async function POST(req: Request) {
     
     const orderNumber = `GW${nextOrderNum}`;
 
-    // Create new order
-    const order = await db.collection('orders').insertOne({
-      userId: new ObjectId(user.id),
+    // Create order object
+    const orderData: any = {
       orderNumber,
       items,
       totalAmount,
@@ -37,14 +30,35 @@ export async function POST(req: Request) {
       paymentMethod,
       status: 'PENDING',
       createdAt: new Date()
-    });
+    };
 
-    // Add order ID to user's orders array
-    const userId = new ObjectId(user.id);
-    await db.collection('users').updateOne(
-      { _id: userId },
-      { $addToSet: { orders: order.insertedId } }
-    );
+    // If token is provided, verify user and add userId
+    let userId: ObjectId | null = null;
+    if (token) {
+      const user = await verifyToken(token);
+      if (user) {
+        userId = new ObjectId(user.id);
+        orderData.userId = userId;
+      }
+    }
+
+    // Create new order
+    const order = await db.collection('orders').insertOne(orderData);
+
+    // If user is authenticated, update user's orders array and points
+    if (userId) {
+      // Calculate points (1 point per 10 taka spent)
+      const pointsEarned = Math.floor(totalAmount / 10);
+
+      // Update user document with new order and points
+      await db.collection('users').updateOne(
+        { _id: userId },
+        { 
+          $addToSet: { orders: order.insertedId },
+          $inc: { points: pointsEarned }
+        }
+      );
+    }
 
     return NextResponse.json({ success: true, order: { _id: order.insertedId, orderNumber } });
   } catch (error) {

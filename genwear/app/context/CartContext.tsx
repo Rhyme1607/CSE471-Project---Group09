@@ -2,17 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUser } from './UserContext';
-
-// Define types for cart items
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-  size?: string;
-  color?: string;
-}
+import { CartItem } from '@/types';
 
 // Define the context type
 interface CartContextType {
@@ -23,6 +13,10 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  discountCode: string;
+  discountAmount: number;
+  applyDiscount: (code: string) => boolean;
+  removeDiscount: () => void;
 }
 
 // Create the context
@@ -37,6 +31,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const { user, token, isAuthenticated } = useUser();
   const [isLoading, setIsLoading] = useState(true);
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
   
   // Watch for authentication changes and clear cart when user logs out
   useEffect(() => {
@@ -109,8 +105,17 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     // Skip the first render to avoid unnecessary API calls
     if (isLoading) return;
     
-    // Always save to localStorage
-    localStorage.setItem('cart', JSON.stringify(items));
+    // Always save to localStorage with proper serialization
+    try {
+      const serializedCart = JSON.stringify(items, (key, value) => {
+        // Handle undefined values
+        if (value === undefined) return null;
+        return value;
+      });
+      localStorage.setItem('cart', serializedCart);
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+    }
     
     // If authenticated, also save to database
     if (isAuthenticated && token) {
@@ -138,22 +143,55 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   
   // Calculate total price with 2 decimal places
-  const totalPrice = Number(items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2));
+  const subtotal = Number(items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2));
+  
+  // Apply discount to total price
+  const totalPrice = Number((subtotal - discountAmount).toFixed(2));
+  
+  // Apply discount code
+  const applyDiscount = (code: string): boolean => {
+    const upperCode = code.toUpperCase();
+    
+    if (upperCode === 'GEN101') {
+      setDiscountCode(upperCode);
+      setDiscountAmount(Number((subtotal * 0.1).toFixed(2))); // 10% discount
+      return true;
+    } else if (upperCode === 'GW2025') {
+      setDiscountCode(upperCode);
+      setDiscountAmount(Number((subtotal * 0.25).toFixed(2))); // 25% discount
+      return true;
+    } else {
+      return false;
+    }
+  };
+  
+  // Remove discount
+  const removeDiscount = () => {
+    setDiscountCode('');
+    setDiscountAmount(0);
+  };
   
   // Add item to cart
   const addItem = (newItem: CartItem) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === newItem.id);
+      // Check if item exists with same ID, size, and customizations
+      const existingItem = prevItems.find((item) => 
+        item.id === newItem.id && 
+        item.size === newItem.size &&
+        JSON.stringify(item.customizations) === JSON.stringify(newItem.customizations)
+      );
       
       if (existingItem) {
-        // If item already exists, increase quantity
+        // If item exists with same properties, increase quantity
         return prevItems.map((item) =>
-          item.id === newItem.id
+          item.id === newItem.id && 
+          item.size === newItem.size &&
+          JSON.stringify(item.customizations) === JSON.stringify(newItem.customizations)
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        // If item doesn't exist, add it with quantity 1
+        // If item doesn't exist or has different properties, add as new item
         return [...prevItems, { ...newItem, quantity: 1 }];
       }
     });
@@ -161,7 +199,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   
   // Remove item from cart
   const removeItem = (id: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    setItems((prevItems) => {
+      // Find the item to get its size and customizations
+      const itemToRemove = prevItems.find(item => item.id === id);
+      if (!itemToRemove) return prevItems;
+
+      // Remove the item with matching id, size, and customizations
+      return prevItems.filter(item => 
+        !(item.id === id && 
+          item.size === itemToRemove.size &&
+          JSON.stringify(item.customizations) === JSON.stringify(itemToRemove.customizations))
+      );
+    });
   };
   
   // Update item quantity
@@ -191,6 +240,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     clearCart,
     totalItems,
     totalPrice,
+    discountCode,
+    discountAmount,
+    applyDiscount,
+    removeDiscount,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

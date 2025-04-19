@@ -12,10 +12,12 @@ import CartIcon from '../components/CartIcon';
 import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, totalItems, totalPrice, discountCode, discountAmount, applyDiscount, removeDiscount, clearCart } = useCart();
   const { user, isAuthenticated, logout } = useUser();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const router = useRouter();
+  const [discountInput, setDiscountInput] = useState('');
+  const [discountError, setDiscountError] = useState('');
 
   const handleLogout = () => {
     logout();
@@ -24,10 +26,21 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    if (!isAuthenticated) {
-      router.push('/login');
+    router.push('/checkout');
+  };
+
+  const handleApplyDiscount = () => {
+    if (!discountInput.trim()) {
+      setDiscountError('Please enter a discount code');
+      return;
+    }
+    
+    const success = applyDiscount(discountInput.trim());
+    if (success) {
+      setDiscountError('');
+      setDiscountInput('');
     } else {
-      router.push('/checkout');
+      setDiscountError('Invalid discount code');
     }
   };
 
@@ -170,16 +183,55 @@ export default function CartPage() {
                         <p className="text-sm text-gray-600 mb-2">
                           ৳{item.price.toFixed(2)} each
                         </p>
+                        
+                        {/* Customization Badge */}
+                        {(item.customizations?.color || item.customizations?.image) && (
+                          <div className="mb-2 inline-block bg-teal-100 text-teal-800 text-xs font-medium px-2 py-1 rounded">
+                            Customized
+                          </div>
+                        )}
+                        
                         {item.size && (
                           <p className="text-sm text-gray-600">
                             Size: <span className="font-medium">{item.size}</span>
                           </p>
                         )}
+                        
                         {item.color && (
                           <p className="text-sm text-gray-600">
                             Color: <span className="font-medium">{item.color}</span>
                           </p>
                         )}
+                        
+                        {/* Customizations Section */}
+                        {(item.customizations?.color || item.customizations?.image) && (
+                          <div className="mt-2 p-2 bg-gray-50 rounded-md">
+                            <p className="text-xs font-medium text-gray-700 mb-1">Customizations:</p>
+                            {item.customizations?.color && (
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs text-gray-600">Custom Color:</span>
+                                <div 
+                                  className="w-4 h-4 rounded-full border border-gray-300" 
+                                  style={{ backgroundColor: item.customizations.color }}
+                                ></div>
+                              </div>
+                            )}
+                            {item.customizations?.image && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-600">Custom Design:</span>
+                                <div className="relative w-8 h-8 rounded overflow-hidden">
+                                  <Image
+                                    src={item.customizations.image}
+                                    alt="Custom Design"
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center border rounded">
                             <button
@@ -226,27 +278,68 @@ export default function CartPage() {
             
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-                <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">৳{Number(totalPrice).toFixed(2)}</span>
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Order Summary</h2>
+                
+                {/* Discount Code Section */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Have a discount code?</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={discountInput}
+                      onChange={(e) => setDiscountInput(e.target.value)}
+                      placeholder="Enter code"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                    />
+                    <button
+                      onClick={handleApplyDiscount}
+                      className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors text-sm font-medium"
+                    >
+                      Apply
+                    </button>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium">Free</span>
+                  {discountError && (
+                    <p className="text-red-500 text-sm mt-1">{discountError}</p>
+                  )}
+                  {discountCode && (
+                    <div className="mt-2 flex items-center justify-between text-green-600 text-sm">
+                      <span>Discount applied: {discountCode}</span>
+                      <button
+                        onClick={removeDiscount}
+                        className="text-sm underline hover:text-green-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>৳{(totalPrice + discountAmount).toFixed(2)}</span>
                   </div>
-                  <div className="border-t pt-3 flex justify-between font-semibold">
-                    <span>Total</span>
-                    <span>৳{Number(totalPrice).toFixed(2)}</span>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount</span>
+                      <span>-৳{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between font-semibold text-lg">
+                      <span>Total</span>
+                      <span>৳{totalPrice.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
+
                 <Button 
-                  className="w-full bg-teal-600 hover:bg-teal-700"
+                  className="w-full bg-teal-600 hover:bg-teal-700 mt-6"
                   onClick={handleCheckout}
                 >
                   Proceed to Checkout
                 </Button>
+                
                 <p className="text-xs text-gray-500 mt-4 text-center">
                   By proceeding to checkout, you agree to our Terms of Service and Privacy Policy.
                 </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Product, CartItem } from '@/types';
+import AIChatbox from '@/app/components/AIChatbox';
 
 // CSS for hiding scrollbar
 const styles = `
@@ -43,6 +44,12 @@ interface CustomizationOptions {
   material: string;
 }
 
+interface HistoryEntry {
+  color?: string;
+  image?: string;
+  timestamp: string;
+}
+
 export default function CustomizePage() {
   const params = useParams();
   const router = useRouter();
@@ -59,7 +66,8 @@ export default function CustomizePage() {
   const [modelError, setModelError] = useState(false);
   const [customColor, setCustomColor] = useState<string | null>(null);
   const [customImage, setCustomImage] = useState<string | null>(null);
-  const [customizationHistory, setCustomizationHistory] = useState<{color?: string, image?: string}[]>([]);
+  const [isFullTexture, setIsFullTexture] = useState(false);
+  const [customizationHistory, setCustomizationHistory] = useState<HistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [size, setSize] = useState<string>('M');
@@ -71,6 +79,7 @@ export default function CustomizePage() {
     pattern: 'solid',
     material: 'cotton'
   });
+  const modelViewerRef = useRef<any>(null);
 
   // Predefined colors for the color picker
   const colorOptions = [
@@ -106,33 +115,50 @@ export default function CustomizePage() {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert('Please select a size');
+      toast({
+        title: "Size Required",
+        description: "Please select a size before adding to cart",
+        variant: "destructive"
+      });
       return;
     }
-    
-    if (!selectedColor) {
-      alert('Please select a color');
+
+    if (!product) {
+      toast({
+        title: "Error",
+        description: "Product not found",
+        variant: "destructive"
+      });
       return;
     }
-    
-    if (product) {
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images[0],
-        quantity: quantity,
-        size: selectedSize,
-        color: selectedColor,
-        customizations: {
-          color: selectedColor,
-          image: customImage,
-        },
-      } as CartItem);
-      
-      setAddedToCart(true);
-      setTimeout(() => setAddedToCart(false), 2000);
+
+    // Create a unique ID for this specific customization
+    const customizedId = `${product.id}-${selectedSize}-${customColor || 'default'}-${customImage ? 'custom' : 'default'}`;
+
+    // Only include customizations if they exist
+    const cartItem: CartItem = {
+      id: customizedId,
+      name: `${product.name}${customColor || customImage ? ' (Customized)' : ''}`,
+      price: product.price,
+      image: product.images[0],
+      quantity: 1,
+      size: selectedSize
+    };
+
+    // Add customizations only if they exist
+    if (customColor || customImage) {
+      cartItem.customizations = {};
+      if (customColor) cartItem.customizations.color = customColor;
+      if (customImage) cartItem.customizations.image = customImage;
     }
+
+    // Add the item to cart
+    addItem(cartItem);
+
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} has been added to your cart${customColor || customImage ? ' with customizations' : ''}`,
+    });
   };
 
   const handleColorChange = (color: string) => {
@@ -154,10 +180,12 @@ export default function CustomizePage() {
     }
   };
 
-  const addToHistory = (change: {color?: string, image?: string}) => {
-    // Remove any future history if we're not at the end
-    const newHistory = customizationHistory.slice(0, historyIndex + 1);
-    newHistory.push(change);
+  const addToHistory = (entry: Omit<HistoryEntry, 'timestamp'>) => {
+    const historyEntry: HistoryEntry = {
+      ...entry,
+      timestamp: new Date().toISOString()
+    };
+    const newHistory = [...customizationHistory.slice(0, historyIndex + 1), historyEntry];
     setCustomizationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   };
@@ -242,6 +270,17 @@ export default function CustomizePage() {
         variant: 'destructive'
       });
     }
+  };
+
+  const handleImageGenerated = (imageUrl: string) => {
+    setCustomImage(imageUrl);
+    addToHistory({ image: imageUrl });
+    
+    // Show a toast notification
+    toast({
+      title: 'Image Generated',
+      description: 'The AI has generated an image and applied it to your model.',
+    });
   };
 
   if (loading) {
@@ -380,10 +419,17 @@ export default function CustomizePage() {
           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
             <div className="h-[70vh] min-h-[500px]">
               {modelUrl ? (
-                <IframeModelViewer 
-                  modelUrl={modelUrl} 
+                <IframeModelViewer
+                  modelUrl={modelUrl}
                   customColor={customColor || undefined}
                   customImage={customImage || undefined}
+                  isFullTexture={isFullTexture}
+                  onColorChange={(color) => {
+                    setCustomColor(color);
+                    addToHistory({
+                      color: color
+                    });
+                  }}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center bg-gray-100">
@@ -393,73 +439,13 @@ export default function CustomizePage() {
             </div>
           </div>
           
-          {/* Customization Controls */}
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">Customize Your {product.name}</h3>
-            
-            <Tabs defaultValue="color" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="color">Color</TabsTrigger>
-                <TabsTrigger value="texture">Texture</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="color" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Choose a Color</CardTitle>
-                    <CardDescription>Select a color to apply to the 3D model</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-4 gap-4">
-                      {colorOptions.map((color) => (
-                        <button
-                          key={color.value}
-                          className={`w-12 h-12 rounded-full border-2 ${
-                            selectedColor === color.value ? 'border-teal-600' : 'border-gray-300'
-                          }`}
-                          style={{ backgroundColor: color.value }}
-                          onClick={() => handleColorChange(color.value)}
-                          title={color.name}
-                        />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="texture" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upload Texture</CardTitle>
-                    <CardDescription>Upload an image to use as a texture on the 3D model</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid w-full max-w-sm items-center gap-1.5">
-                        <Label htmlFor="texture">Texture Image</Label>
-                        <Input
-                          id="texture"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                        />
-                      </div>
-                      
-                      {customImage && (
-                        <div className="mt-4">
-                          <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
-                          <img
-                            src={customImage}
-                            alt="Texture preview"
-                            className="w-32 h-32 object-cover rounded-md"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+          {/* Customization Options */}
+          <div className="grid grid-cols-1 gap-4 mb-8">
+            {/* AI Image Generation Section */}
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <h2 className="text-lg font-semibold mb-2">AI Design Assistant</h2>
+              <AIChatbox onImageGenerated={handleImageGenerated} />
+            </div>
           </div>
           
           {/* Compact Product Info and Add to Cart */}
@@ -492,7 +478,7 @@ export default function CustomizePage() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Size
@@ -505,24 +491,6 @@ export default function CustomizePage() {
                     {product.sizes.map((size: string) => (
                       <SelectItem key={size} value={size}>
                         {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Color
-                </label>
-                <Select value={selectedColor} onValueChange={setSelectedColor}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {product.colors.map((color: string) => (
-                      <SelectItem key={color} value={color}>
-                        {color}
                       </SelectItem>
                     ))}
                   </SelectContent>

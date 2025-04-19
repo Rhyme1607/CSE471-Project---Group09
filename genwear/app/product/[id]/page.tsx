@@ -86,7 +86,7 @@ export default function ProductPage() {
         image: product.images[0],
         quantity: quantity,
         size: selectedSize,
-        color: selectedColor
+        color: selectedColor // Use the direct color property for regular product colors
       });
       
       setAddedToCart(true);
@@ -463,7 +463,7 @@ export default function ProductPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Truck className="w-5 h-5" />
-                <span>Free shipping on orders over ৳10000</span>
+                <span>Free shipping on orders over ৳1000</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <RotateCcw className="w-5 h-5" />

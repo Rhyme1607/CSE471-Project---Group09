@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,16 +8,22 @@ import { FaCheckCircle, FaShoppingBag, FaHome } from 'react-icons/fa';
 
 export default function OrderConfirmationPage() {
   const router = useRouter();
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
 
   useEffect(() => {
-    // Redirect to home if accessed directly without completing checkout
-    const hasOrderCompleted = sessionStorage.getItem('orderCompleted');
-    if (!hasOrderCompleted) {
+    // Get order number from URL
+    const path = window.location.pathname;
+    const orderNum = path.split('/').pop();
+    if (orderNum) {
+      setOrderNumber(orderNum);
+    } else {
       router.push('/');
     }
-    // Clear the order completed flag
-    sessionStorage.removeItem('orderCompleted');
   }, [router]);
+
+  if (!orderNumber) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -29,7 +35,7 @@ export default function OrderConfirmationPage() {
             </div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Order Confirmed!</h1>
             <p className="text-gray-600">
-              Thank you for your purchase. Your order has been successfully placed.
+              Thank you for your purchase. Your order #{orderNumber} has been successfully placed.
             </p>
           </div>
 

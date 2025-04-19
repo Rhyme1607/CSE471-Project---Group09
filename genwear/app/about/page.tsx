@@ -97,7 +97,6 @@ export default function AboutUs() {
                       {user?.name?.[0]?.toUpperCase() || 'U'}
                     </div>
                   )}
-                  <span className="hidden md:block">{user?.name || 'Account'}</span>
                   <FaChevronDown className="w-4 h-4" />
                 </button>
                 {isProfileOpen && (

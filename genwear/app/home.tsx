@@ -30,12 +30,12 @@ function SearchBar({ products }: { products: any[] }) {
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+      <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
         <Search className="w-5 h-5 text-gray-500" />
         <input
           type="text"
           placeholder="Search Product"
-          className="bg-transparent outline-none w-40"
+          className="bg-transparent outline-none w-64 text-base"
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
@@ -50,17 +50,18 @@ function SearchBar({ products }: { products: any[] }) {
         <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto z-50">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product, index) => (
-              <div
+              <Link
                 key={index}
-                className="p-2 hover:bg-gray-50 cursor-pointer flex items-center gap-3"
+                href={`/product/${product.id}`}
+                className="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3"
                 onClick={() => {
-                  setSearchQuery(product.name);
+                  setSearchQuery('');
                   setIsOpen(false);
                 }}
               >
-                <div className="relative w-10 h-10">
+                <div className="relative w-12 h-12">
                   <Image
-                    src={product.image}
+                    src={product.images[0]}
                     alt={product.name}
                     fill
                     className="object-contain"
@@ -68,9 +69,9 @@ function SearchBar({ products }: { products: any[] }) {
                 </div>
                 <div>
                   <div className="text-sm font-medium">{product.name}</div>
-                  <div className="text-xs text-gray-500">{product.category} • {product.price}</div>
+                  <div className="text-xs text-gray-500">৳{product.price.toFixed(2)}</div>
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="p-3 text-center text-gray-500">No products found</div>

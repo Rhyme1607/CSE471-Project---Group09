@@ -8,6 +8,7 @@ interface IframeModelViewerProps {
   customColor?: string;
   customImage?: string;
   isFullTexture?: boolean;
+  onColorChange?: (color: string) => void;
 }
 
 export default function IframeModelViewer({
@@ -15,6 +16,7 @@ export default function IframeModelViewer({
   customColor,
   customImage,
   isFullTexture = false,
+  onColorChange,
 }: IframeModelViewerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,6 +73,9 @@ export default function IframeModelViewer({
           setIsLoading(false);
           break;
         case 'colorApplied':
+          if (onColorChange) {
+            onColorChange(data.color);
+          }
           toast({
             title: 'Color applied',
             description: 'The color has been successfully applied to the model.',
@@ -117,7 +122,7 @@ export default function IframeModelViewer({
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [modelUrl, isIframeReady, toast]);
+  }, [modelUrl, isIframeReady, toast, onColorChange]);
 
   // Send model URL when it changes
   useEffect(() => {
@@ -143,12 +148,12 @@ export default function IframeModelViewer({
         { 
           type: 'updateTexture', 
           imageUrl: customImage,
-          isFull: isFullTexture
+          isFull: true
         },
         '*'
       );
     }
-  }, [customImage, isIframeReady, isFullTexture]);
+  }, [customImage, isIframeReady]);
 
   // Retry loading the model
   const retryLoading = () => {

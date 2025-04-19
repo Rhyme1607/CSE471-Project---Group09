@@ -12,6 +12,7 @@ interface User {
   birthdate?: string;
   bio?: string;
   profileImage?: string;
+  points?: number;
   shippingAddress?: {
     fullName: string;
     phone: string;
