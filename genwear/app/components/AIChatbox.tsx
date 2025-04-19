@@ -121,7 +121,7 @@ export default function AIChatbox({ onImageGenerated }: AIChatboxProps) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY || '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'}`
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`
           },
           body: JSON.stringify({
             model: 'gpt-3.5-turbo',
