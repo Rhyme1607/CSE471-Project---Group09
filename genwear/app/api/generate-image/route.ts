@@ -11,7 +11,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Enhance the prompt for better clothing texture generation
     let enhancedPrompt = prompt;
     if (!enhancedPrompt.toLowerCase().includes('clothing') && 
         !enhancedPrompt.toLowerCase().includes('shirt') && 
@@ -22,7 +21,6 @@ export async function POST(request: Request) {
       enhancedPrompt = `A clothing design texture with ${enhancedPrompt}`;
     }
     
-    // Add specific instructions for texture generation
     enhancedPrompt += ". Create a seamless texture pattern suitable for applying to clothing.";
 
     const response = await fetch('https://api.openai.com/v1/images/generations', {
