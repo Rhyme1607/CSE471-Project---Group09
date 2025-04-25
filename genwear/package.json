@@ -19,7 +19,7 @@
     "@radix-ui/react-tabs": "^1.1.4",
     "@radix-ui/react-toast": "^1.2.7",
     "@react-three/drei": "^9.74.16",
-    "@react-three/fiber": "^9.1.2",
+    "@react-three/fiber": "^8.18.0",
     "@types/react-datepicker": "^6.2.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
