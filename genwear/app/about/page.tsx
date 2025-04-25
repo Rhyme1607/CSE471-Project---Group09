@@ -65,15 +65,6 @@ export default function AboutUs() {
           </div>
           
           <div className="flex items-center gap-4">
-            <button className="p-2">
-              <Menu className="w-6 h-6 text-gray-600" />
-            </button>
-            <button className="p-2">
-              <Mail className="w-6 h-6 text-gray-600" />
-            </button>
-            <button className="p-2">
-              <Bell className="w-6 h-6 text-gray-600" />
-            </button>
             <Link href="/cart" className="relative">
               <FaShoppingCart className="text-2xl text-gray-600 hover:text-teal-600 transition-colors" />
               <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">

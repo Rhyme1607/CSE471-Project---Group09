@@ -34,7 +34,8 @@ export const verifyToken = async (token: string) => {
       bio: user.bio,
       phone: user.phone,
       birthdate: user.birthdate,
-      shippingAddress: user.shippingAddress
+      shippingAddress: user.shippingAddress,
+      points: user.points || 0
     };
   } catch (error) {
     console.error('Error verifying token:', error);

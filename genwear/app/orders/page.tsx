@@ -25,7 +25,7 @@ interface Order {
   orderNumber: string;
   items: OrderItem[];
   totalAmount: number;
-  status: 'PENDING' | 'SHIPPED' | 'DELIVERED';
+  status: 'PENDING' | 'SHIPPED' | 'DELIVERED' | 'PAID';
   createdAt: string;
   shippingAddress: {
     fullName: string;
@@ -70,21 +70,33 @@ export default function OrderHistory() {
 
     const fetchOrders = async () => {
       try {
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
         const response = await fetch('/api/orders/user', {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch orders');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch orders');
         }
 
         const data = await response.json();
+        if (!data.orders) {
+          throw new Error('No orders data received');
+        }
+
         setOrders(data.orders);
+        setError('');
       } catch (err) {
-        setError('Failed to load orders');
         console.error('Error fetching orders:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load orders');
+        setOrders([]);
       } finally {
         setIsLoadingOrders(false);
       }
@@ -104,6 +116,8 @@ export default function OrderHistory() {
         return 'bg-green-100 text-green-800';
       case 'SHIPPED':
         return 'bg-blue-100 text-blue-800';
+      case 'PAID':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-yellow-100 text-yellow-800';
     }

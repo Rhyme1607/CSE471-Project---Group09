@@ -194,15 +194,6 @@ export default function Home() {
             <div className="hidden md:block">
               <SearchBar products={allProducts} />
             </div>
-            <button className="hidden md:block text-white">
-              <Menu className="w-6 h-6" />
-            </button>
-            <button className="hidden md:block text-white">
-              <Mail className="w-6 h-6" />
-            </button>
-            <button className="hidden md:block text-white">
-              <Bell className="w-6 h-6" />
-            </button>
             <div>
               <CartIcon className="text-white hover:text-teal-200 transition-colors" />
             </div>
@@ -510,86 +501,92 @@ export default function Home() {
 
         {/* Promo Cards */}
         <div className="absolute top-[10rem] right-16 w-72">
-          <div className="bg-[#e8fcff] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-[#d0f7ff] relative">
-            {/* Decorative circles */}
-            <div className="absolute top-4 left-4 w-16 h-16 rounded-full bg-[#00e0c6] opacity-20"></div>
-            <div className="absolute bottom-20 right-4 w-12 h-12 rounded-full bg-[#00e0c6] opacity-20"></div>
-            
-            {/* Decorative lines */}
-            <div className="absolute top-12 left-8 w-24 h-1 bg-[#00e0c6] opacity-30 transform -rotate-12"></div>
-            <div className="absolute bottom-16 right-8 w-16 h-1 bg-[#00e0c6] opacity-30 transform rotate-12"></div>
-            
-            <div className="p-6 relative z-10">
-              <h3 className="text-xl font-bold text-teal-800">Check out the new summer collections</h3>
-              <div className="flex items-center gap-2 mt-4">
-                <span className="font-medium">Check it out</span>
-                <ChevronRight className="w-5 h-5" />
+          <Link href="/promotions#summer">
+            <div className="bg-[#e8fcff] rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-[#d0f7ff] relative">
+              {/* Decorative circles */}
+              <div className="absolute top-4 left-4 w-16 h-16 rounded-full bg-[#00e0c6] opacity-20"></div>
+              <div className="absolute bottom-20 right-4 w-12 h-12 rounded-full bg-[#00e0c6] opacity-20"></div>
+              
+              {/* Decorative lines */}
+              <div className="absolute top-12 left-8 w-24 h-1 bg-[#00e0c6] opacity-30 transform -rotate-12"></div>
+              <div className="absolute bottom-16 right-8 w-16 h-1 bg-[#00e0c6] opacity-30 transform rotate-12"></div>
+              
+              <div className="p-6 relative z-10">
+                <h3 className="text-xl font-bold text-teal-800">Check out the new summer collections</h3>
+                <div className="flex items-center gap-2 mt-4">
+                  <span className="font-medium">Check it out</span>
+                  <ChevronRight className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex justify-end relative z-10">
+                <Image 
+                  src="/U+NK+SB+TEE+M90+OC+TOW-Photoroom.png" 
+                  alt="Summer collection" 
+                  width={200} 
+                  height={200}
+                  className="object-cover transition-transform duration-300 hover:scale-110"
+                />
               </div>
             </div>
-            <div className="flex justify-end relative z-10">
-              <Image 
-                src="/U+NK+SB+TEE+M90+OC+TOW-Photoroom.png" 
-                alt="Summer collection" 
-                width={200} 
-                height={200}
-                className="object-cover transition-transform duration-300 hover:scale-110"
-              />
-            </div>
-          </div>
+          </Link>
 
-          <div className="bg-[#a1ffa1] rounded-xl overflow-hidden mt-16 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-[#8eff8e] relative">
-            {/* Decorative circles */}
-            <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-[#00e0c6] opacity-20"></div>
-            <div className="absolute bottom-20 left-4 w-12 h-12 rounded-full bg-[#00e0c6] opacity-20"></div>
-            
-            {/* Decorative lines */}
-            <div className="absolute top-12 right-8 w-24 h-1 bg-[#00e0c6] opacity-30 transform rotate-12"></div>
-            <div className="absolute bottom-16 left-8 w-16 h-1 bg-[#00e0c6] opacity-30 transform -rotate-12"></div>
-            
-            <div className="p-6 relative z-10">
-              <h3 className="text-xl font-bold text-teal-800">New and Featured</h3>
-              <div className="flex items-center gap-2 mt-4">
-                <span className="font-medium">Buy it now</span>
-                <ChevronRight className="w-5 h-5" />
+          <Link href="/promotions#featured">
+            <div className="bg-[#a1ffa1] rounded-xl overflow-hidden mt-16 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-[#8eff8e] relative">
+              {/* Decorative circles */}
+              <div className="absolute top-4 right-4 w-16 h-16 rounded-full bg-[#00e0c6] opacity-20"></div>
+              <div className="absolute bottom-20 left-4 w-12 h-12 rounded-full bg-[#00e0c6] opacity-20"></div>
+              
+              {/* Decorative lines */}
+              <div className="absolute top-12 right-8 w-24 h-1 bg-[#00e0c6] opacity-30 transform rotate-12"></div>
+              <div className="absolute bottom-16 left-8 w-16 h-1 bg-[#00e0c6] opacity-30 transform -rotate-12"></div>
+              
+              <div className="p-6 relative z-10">
+                <h3 className="text-xl font-bold text-teal-800">New and Featured</h3>
+                <div className="flex items-center gap-2 mt-4">
+                  <span className="font-medium">Buy it now</span>
+                  <ChevronRight className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex justify-end relative z-10">
+                <Image 
+                  src="/PUMA-x-LAMELO-BALL-Golden-Child-Men's-Basketball-Tee-Photoroom.png" 
+                  alt="Featured collection" 
+                  width={200} 
+                  height={200}
+                  className="object-cover transition-transform duration-300 hover:scale-110"
+                />
               </div>
             </div>
-            <div className="flex justify-end relative z-10">
-              <Image 
-                src="/PUMA-x-LAMELO-BALL-Golden-Child-Men's-Basketball-Tee-Photoroom.png" 
-                alt="Featured collection" 
-                width={200} 
-                height={200}
-                className="object-cover transition-transform duration-300 hover:scale-110"
-              />
-            </div>
-          </div>
+          </Link>
 
-          <div className="bg-[#e8d8ff] rounded-xl overflow-hidden mt-16 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-[#d8c8ff] relative">
-            {/* Decorative circles */}
-            <div className="absolute top-4 left-4 w-16 h-16 rounded-full bg-[#9a7aff] opacity-20"></div>
-            <div className="absolute bottom-20 right-4 w-12 h-12 rounded-full bg-[#9a7aff] opacity-20"></div>
-            
-            {/* Decorative lines */}
-            <div className="absolute top-12 left-8 w-24 h-1 bg-[#9a7aff] opacity-30 transform -rotate-12"></div>
-            <div className="absolute bottom-16 right-8 w-16 h-1 bg-[#9a7aff] opacity-30 transform rotate-12"></div>
-            
-            <div className="p-6 relative z-10">
-              <h3 className="text-xl font-bold text-purple-800">Limited Edition Collection</h3>
-              <div className="flex items-center gap-2 mt-4">
-                <span className="font-medium">Explore now</span>
-                <ChevronRight className="w-5 h-5" />
+          <Link href="/promotions#limited">
+            <div className="bg-[#e8d8ff] rounded-xl overflow-hidden mt-16 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-[#d8c8ff] relative">
+              {/* Decorative circles */}
+              <div className="absolute top-4 left-4 w-16 h-16 rounded-full bg-[#9a7aff] opacity-20"></div>
+              <div className="absolute bottom-20 right-4 w-12 h-12 rounded-full bg-[#9a7aff] opacity-20"></div>
+              
+              {/* Decorative lines */}
+              <div className="absolute top-12 left-8 w-24 h-1 bg-[#9a7aff] opacity-30 transform -rotate-12"></div>
+              <div className="absolute bottom-16 right-8 w-16 h-1 bg-[#9a7aff] opacity-30 transform rotate-12"></div>
+              
+              <div className="p-6 relative z-10">
+                <h3 className="text-xl font-bold text-purple-800">Limited Edition Collection</h3>
+                <div className="flex items-center gap-2 mt-4">
+                  <span className="font-medium">Explore now</span>
+                  <ChevronRight className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="flex justify-end relative z-10">
+                <Image 
+                  src="/JORDAN+6+RINGS-Photoroom.png" 
+                  alt="Limited edition collection" 
+                  width={200} 
+                  height={200}
+                  className="object-cover transition-transform duration-300 hover:scale-110"
+                />
               </div>
             </div>
-            <div className="flex justify-end relative z-10">
-              <Image 
-                src="/JORDAN+6+RINGS-Photoroom.png" 
-                alt="Limited edition collection" 
-                width={200} 
-                height={200}
-                className="object-cover transition-transform duration-300 hover:scale-110"
-              />
-            </div>
-          </div>
+          </Link>
         </div>
       </main>
 

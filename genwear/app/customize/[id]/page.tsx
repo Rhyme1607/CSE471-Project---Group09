@@ -15,10 +15,6 @@ import { useCart } from '@/app/context/CartContext';
 import CartIcon from '../../components/CartIcon';
 import IframeModelViewer from '@/app/components/IframeModelViewer';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Product, CartItem } from '@/types';
 import AIChatbox from '@/app/components/AIChatbox';
 
@@ -324,15 +320,6 @@ export default function CustomizePage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <button className="p-2 text-gray-600 hover:text-teal-600 md:hidden">
-                <Menu className="w-6 h-6" />
-              </button>
-              <button className="p-2 text-gray-600 hover:text-teal-600 hidden md:block">
-                <Mail className="w-6 h-6" />
-              </button>
-              <button className="p-2 text-gray-600 hover:text-teal-600 hidden md:block">
-                <Bell className="w-6 h-6" />
-              </button>
               <CartIcon />
               {isAuthenticated ? (
                 <div className="relative">
@@ -474,7 +461,7 @@ export default function CustomizePage() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-teal-600">
-                ${product.price.toFixed(2)}
+                ৳{product.price.toFixed(2)}
               </div>
             </div>
             

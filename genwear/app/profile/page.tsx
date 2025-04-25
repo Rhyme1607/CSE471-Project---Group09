@@ -40,7 +40,7 @@ interface Order {
   orderNumber: string;
   items: OrderItem[];
   totalAmount: number;
-  status: 'PENDING' | 'SHIPPED' | 'DELIVERED';
+  status: 'PENDING' | 'SHIPPED' | 'DELIVERED' | 'PAID';
   createdAt: string;
   shippingAddress: {
     fullName: string;
@@ -54,7 +54,7 @@ interface Order {
 }
 
 export default function Profile() {
-  const { user, updateUser, token } = useUser();
+  const { user, updateUser, token, fetchUserData } = useUser();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -80,10 +80,54 @@ export default function Profile() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [orderError, setOrderError] = useState('');
+  const [points, setPoints] = useState<number>(0);
+  const [isLoadingPoints, setIsLoadingPoints] = useState(true);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+    }
+  }, [user, router]);
+
+  // Fetch latest user data when component mounts
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const response = await fetch('/api/profile', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+
+          const data = await response.json();
+          if (data.user) {
+            setPoints(data.user.points || 0);
+            setIsLoadingPoints(false);
+            updateUser(data.user);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setIsLoadingPoints(false);
+        }
+      }
+    };
+
+    fetchUser();
+    // Add a refresh interval to update user data periodically
+    const interval = setInterval(fetchUser, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [token, updateUser]);
 
   // Update form data when user data changes
   useEffect(() => {
-    if (user) {
+    if (user && !isEditing) {
       setFormData({
         bio: user.bio || '',
         phone: user.phone || '',
@@ -100,7 +144,7 @@ export default function Profile() {
         }
       });
     }
-  }, [user]);
+  }, [user, isEditing]);
 
   // Fetch orders when component mounts
   useEffect(() => {
@@ -132,7 +176,6 @@ export default function Profile() {
   }, [token]);
 
   if (!user) {
-    router.push('/login');
     return null;
   }
 
@@ -240,6 +283,8 @@ export default function Profile() {
         return 'bg-green-100 text-green-800';
       case 'SHIPPED':
         return 'bg-blue-100 text-blue-800';
+      case 'PAID':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-yellow-100 text-yellow-800';
     }
@@ -509,7 +554,11 @@ export default function Profile() {
                 </div>
                 <div className="bg-teal-50 rounded-lg p-4">
                   <p className="text-sm text-teal-600 mb-1">Points</p>
-                  <p className="text-2xl font-bold text-teal-700">{user?.points || 0}</p>
+                  {isLoadingPoints ? (
+                    <div className="animate-pulse h-8 bg-teal-200 rounded"></div>
+                  ) : (
+                    <p className="text-2xl font-bold text-teal-700">{points}</p>
+                  )}
                   <p className="text-xs text-teal-600 mt-1">1 point per 10 taka spent</p>
                 </div>
               </div>
@@ -621,128 +670,149 @@ export default function Profile() {
             <div className="mt-12">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Shipping Address</h2>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                  <input
-                    type="text"
-                    value={formData.shippingAddress?.fullName || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      shippingAddress: {
-                        ...formData.shippingAddress!,
-                        fullName: e.target.value
-                      }
-                    })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    disabled={!isEditing}
-                  />
-                </div>
+                {isEditing ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                      <input
+                        type="text"
+                        value={formData.shippingAddress?.fullName || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          shippingAddress: {
+                            ...formData.shippingAddress!,
+                            fullName: e.target.value
+                          }
+                        })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <input
-                    type="tel"
-                    value={formData.shippingAddress?.phone || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      shippingAddress: {
-                        ...formData.shippingAddress!,
-                        phone: e.target.value
-                      }
-                    })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    disabled={!isEditing}
-                  />
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Phone</label>
+                      <input
+                        type="tel"
+                        value={formData.shippingAddress?.phone || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          shippingAddress: {
+                            ...formData.shippingAddress!,
+                            phone: e.target.value
+                          }
+                        })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Address</label>
-                  <input
-                    type="text"
-                    value={formData.shippingAddress?.address || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      shippingAddress: {
-                        ...formData.shippingAddress!,
-                        address: e.target.value
-                      }
-                    })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    disabled={!isEditing}
-                  />
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                      <input
+                        type="text"
+                        value={formData.shippingAddress?.address || ''}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          shippingAddress: {
+                            ...formData.shippingAddress!,
+                            address: e.target.value
+                          }
+                        })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">City</label>
-                    <input
-                      type="text"
-                      value={formData.shippingAddress?.city || ''}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        shippingAddress: {
-                          ...formData.shippingAddress!,
-                          city: e.target.value
-                        }
-                      })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      disabled={!isEditing}
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">City</label>
+                        <input
+                          type="text"
+                          value={formData.shippingAddress?.city || ''}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            shippingAddress: {
+                              ...formData.shippingAddress!,
+                              city: e.target.value
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">State</label>
+                        <input
+                          type="text"
+                          value={formData.shippingAddress?.state || ''}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            shippingAddress: {
+                              ...formData.shippingAddress!,
+                              state: e.target.value
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">ZIP Code</label>
+                        <input
+                          type="text"
+                          value={formData.shippingAddress?.zipCode || ''}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            shippingAddress: {
+                              ...formData.shippingAddress!,
+                              zipCode: e.target.value
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Country</label>
+                        <input
+                          type="text"
+                          value={formData.shippingAddress?.country || 'Bangladesh'}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            shippingAddress: {
+                              ...formData.shippingAddress!,
+                              country: e.target.value
+                            }
+                          })}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-gray-900">
+                      <span className="font-medium">Full Name:</span> {formData.shippingAddress?.fullName || 'Not provided'}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="font-medium">Phone:</span> {formData.shippingAddress?.phone || 'Not provided'}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="font-medium">Address:</span> {formData.shippingAddress?.address || 'Not provided'}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="font-medium">City:</span> {formData.shippingAddress?.city || 'Not provided'}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="font-medium">State:</span> {formData.shippingAddress?.state || 'Not provided'}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="font-medium">ZIP Code:</span> {formData.shippingAddress?.zipCode || 'Not provided'}
+                    </p>
+                    <p className="text-gray-900">
+                      <span className="font-medium">Country:</span> {formData.shippingAddress?.country || 'Bangladesh'}
+                    </p>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">State</label>
-                    <input
-                      type="text"
-                      value={formData.shippingAddress?.state || ''}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        shippingAddress: {
-                          ...formData.shippingAddress!,
-                          state: e.target.value
-                        }
-                      })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">ZIP Code</label>
-                    <input
-                      type="text"
-                      value={formData.shippingAddress?.zipCode || ''}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        shippingAddress: {
-                          ...formData.shippingAddress!,
-                          zipCode: e.target.value
-                        }
-                      })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      disabled={!isEditing}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Country</label>
-                    <input
-                      type="text"
-                      value={formData.shippingAddress?.country || 'Bangladesh'}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        shippingAddress: {
-                          ...formData.shippingAddress!,
-                          country: e.target.value
-                        }
-                      })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

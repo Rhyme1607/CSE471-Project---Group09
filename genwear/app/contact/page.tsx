@@ -107,15 +107,6 @@ export default function ContactUs() {
           </div>
           
           <div className="flex items-center gap-4">
-            <button className="p-2">
-              <Menu className="w-6 h-6 text-gray-600" />
-            </button>
-            <button className="p-2">
-              <Mail className="w-6 h-6 text-gray-600" />
-            </button>
-            <button className="p-2">
-              <Bell className="w-6 h-6 text-gray-600" />
-            </button>
             <CartIcon />
             {isAuthenticated ? (
               <div className="relative">

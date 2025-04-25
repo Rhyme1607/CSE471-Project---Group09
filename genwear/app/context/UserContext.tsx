@@ -33,6 +33,7 @@ interface UserContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   updateUser: (userData: Partial<User>) => void;
+  fetchUserData: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -155,7 +156,34 @@ export function UserProvider({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
-  const updateUser = (userData: Partial<User>) => {
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+      
+      // Update storage
+      if (localStorage.getItem('token')) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      if (sessionStorage.getItem('token')) {
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const updateUser = async (userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
@@ -167,6 +195,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (sessionStorage.getItem('token')) {
         sessionStorage.setItem('user', JSON.stringify(updatedUser));
       }
+
+      // Fetch latest user data from database
+      await fetchUserData();
     }
   };
 
@@ -179,7 +210,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       logout, 
       isAuthenticated,
       isLoading,
-      updateUser
+      updateUser,
+      fetchUserData
     }}>
       {children}
     </UserContext.Provider>

@@ -292,15 +292,6 @@ export default function Page() {
                 }}
               />
             </div>
-            <button className="p-2">
-              <Menu className="w-6 h-6" />
-            </button>
-            <button className="p-2">
-              <Mail className="w-6 h-6 text-gray-600" />
-            </button>
-            <button className="p-2">
-              <Bell className="w-6 h-6" />
-            </button>
             {isAuthenticated ? (
               <div className="relative">
                 <button 

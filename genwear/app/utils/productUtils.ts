@@ -20,8 +20,8 @@ export const products = [
     colors: ['Black/Red', 'White/Black', 'Grey/Blue'],
     images: [
       '/JORDAN+6+RINGS-Photoroom.png',
-      '/JORDAN+6+RINGS-Photoroom.png',
-      '/JORDAN+6+RINGS-Photoroom.png',
+      '/JORDAN+6+RINGS.avif',
+      '/JORDAN+6+RINGS-2.avif',
     ],
     modelUrl: '/JORDAN+6+RINGS.glb',
   },
@@ -68,8 +68,8 @@ export const products = [
     colors: ['Black/Gold', 'White/Gold', 'Blue/Gold'],
     images: [
       '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes-Photoroom.png',
-      '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes-Photoroom.png',
-      '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes-Photoroom.png',
+      '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes-1.04-Golden-Child-Men\'s-Basketball-Shoes.png',
+      '/PUMA-x-LAMELO-BALL-MB.04-Golden-Child-Men\'s-Basketball-Shoes3.png',
     ],
     modelUrl: '/PUMA x Lamelo Golden.glb',
   },
@@ -96,6 +96,33 @@ export const products = [
       '/AURORA_FQ8185-500_PHSLH001-2000_3024x.jpg',
     ],
     modelUrl: '/Jordan Luka 3.glb',
+  },
+  {
+    id: 'fenty-x-puma',
+    name: 'FENTY x PUMA Avanti LS Stitched',
+    price: 3644.99,
+    rating: 4.8,
+    reviews: 44,
+    category: 'shoes',
+    description: 'This is the Avanti LS like you’ve never seen it before. Appearing in two bold, beautiful colorways, the Avanti LS Stitched features crochet and stitching details and a classic soccer gum sole. Inspired by the legendary PUMA KING soccer cleat, the Avanti LS Stitched is here to play.',
+    features: [
+      'Regular fit for everyday comfort',
+      'Premium tumbled leather upper for a refined look',
+      'Hairy suede heel accent adds texture and contrast',
+      'Tonal cotton laces with extra decorative set for added style',
+      'Signature tongue flap with embroidered FENTY branding',
+      'Crochet mesh underlay for breathability and detail',
+      'Moulded sockliner for enhanced cushioning',
+      'FENTY x PUMA co-branding for a unique collaboration touch',
+    ]
+    ,
+    sizes: ['7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'],
+    colors: ['Black/Red', 'White/Black', 'Grey/Blue'],
+    images: [
+      '/FENTY-x-PUMA-Avanti-LS-Stitched-Men\'s-Sneakers-Photoroom.png',
+      '/FENTY-x-PUMA-Avanti-LS-Stitched-Men\'s-Sneakers.avif',
+      '/FENTY-x-PUMA-Avanti-LS-Stitched-Men\'s-Sneakers (1).avif',
+    ],
   },
   {
     id: 'jordan-1-mid',
@@ -255,9 +282,9 @@ export const products = [
     sizes: ['One Size'],
     colors: ['Black', 'Navy', 'White'],
     images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
+      '/U+NK+DF+L91+SPORT+CAP.avif',
+      '/U+NK+DF+L91+SPORT+CAP (1).avif',
+      '/U+NK+DF+L91+SPORT+CAP (2).avif',
     ],
   },
   {
@@ -278,9 +305,9 @@ export const products = [
     sizes: ['One Size'],
     colors: ['Black', 'Navy', 'Grey'],
     images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
+      '/Adicolor_Backpack_Black_IJ0761_01_standard.avif',
+      '/Adicolor_Backpack_Black_IJ0761_02_standard.avif',
+      '/Adicolor_Backpack_Black_IJ0761_04_standard.avif',
     ],
   },
   {
@@ -301,9 +328,9 @@ export const products = [
     sizes: ['One Size'],
     colors: ['Black', 'Navy', 'Red'],
     images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
+      '/81TVD-lLmPL._AC_SX569_.png',
+      '/81BuhSMF2QL._AC_SX569_.jpg',
+      '/718dhB9xP5L._AC_SX569_.jpg',
     ],
   },
   {
@@ -368,9 +395,9 @@ export const products = [
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Black/White', 'White/Black', 'Grey/Black'],
     images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
+      '/U+NK+ELITE+CREW+132.avif',
+      '/U+NK+ELITE+CREW+132 (1).avif',
+      '/U+NK+ELITE+CREW+132 (2).avif',
     ],
   },
   {
@@ -391,9 +418,9 @@ export const products = [
     sizes: ['One Size'],
     colors: ['Black', 'Brown', 'Navy'],
     images: [
-      '/placeholder.svg',
-      '/placeholder.svg',
-      '/placeholder.svg',
+      '/Pioneer-Wallet.avif',
+      '/Pioneer-Wallet (1).avif',
+      '/Pioneer-Wallet (2).avif',
     ],
   },
   {

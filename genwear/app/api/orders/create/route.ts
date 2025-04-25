@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       totalAmount,
       shippingAddress,
       paymentMethod,
-      status: 'PENDING',
+      status: paymentMethod === 'card' ? 'PAID' : 'PENDING',
       createdAt: new Date()
     };
 

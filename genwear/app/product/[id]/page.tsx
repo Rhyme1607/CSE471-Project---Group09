@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Star, Truck, RotateCcw, Shield, Heart, Plus, Menu, Mail, Bell, User, Settings, LogOut, Check } from 'lucide-react';
+import { ChevronRight, Star, Truck, RotateCcw, Shield, Heart, Plus, Menu, Mail, Bell, User, Settings, LogOut, Check, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -44,6 +44,9 @@ export default function ProductPage() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [show3DModel, setShow3DModel] = useState(false);
   const [modelError, setModelError] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const productIdOrName = params.id as string;
@@ -169,15 +172,22 @@ export default function ProductPage() {
           </div>
           <div className="flex items-center gap-4">
             <CartIcon />
-            <button className="p-2">
-              <Heart className="w-6 h-6 text-gray-600 hover:text-teal-600" />
-            </button>
-            <button className="p-2">
-              <Mail className="w-6 h-6 text-gray-600" />
-            </button>
-            <button className="p-2">
-              <Bell className="w-6 h-6 text-gray-600" />
-            </button>
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="search"
+                placeholder="Search Product"
+                className="pl-10 w-64 bg-gray-50 border border-gray-300 rounded-md py-2"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setActiveSearchQuery(searchQuery);
+                    setCurrentPage(1);
+                  }
+                }}
+              />
+            </div>
             {isAuthenticated ? (
               <div className="relative">
                 <button 

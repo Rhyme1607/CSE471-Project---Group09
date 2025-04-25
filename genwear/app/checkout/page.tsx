@@ -7,9 +7,10 @@ import { useUser } from '../context/UserContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaShoppingCart, FaSearch, FaHeart, FaChevronDown, FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaWallet } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaHeart, FaChevronDown, FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave } from 'react-icons/fa';
 import { Menu, Mail, Bell, User, Settings, LogOut, CheckCircle } from 'lucide-react';
 import Footer from '@/components/ui/Footer';
+import PaymentSimulator from '../components/PaymentSimulator';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -35,6 +36,8 @@ export default function CheckoutPage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -101,8 +104,8 @@ export default function CheckoutPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePaymentSuccess = async () => {
+    setShowPaymentForm(false);
     setIsSubmitting(true);
     setSubmitError('');
 
@@ -112,6 +115,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           token,
@@ -127,20 +131,82 @@ export default function CheckoutPage() {
             zipCode: formData.zipCode,
             country: formData.country,
           },
-          paymentMethod: formData.paymentMethod,
+          paymentMethod: 'card',
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || 'Failed to create order');
       }
 
-      // Show success modal first
+      // Show success modal
       setShowSuccessModal(true);
 
-      // Wait for 2 seconds before clearing cart and redirecting
+      // Clear cart and redirect after 2 seconds
+      setTimeout(() => {
+        clearCart();
+        router.push('/');
+      }, 2000);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePaymentFailure = (error: string) => {
+    setPaymentError(error);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // If card payment is selected but payment form is not shown yet
+    if (formData.paymentMethod === 'card' && !showPaymentForm) {
+      setShowPaymentForm(true);
+      return;
+    }
+
+    // For cash on delivery, proceed with order creation
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      // Create order
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          token,
+          items: items,
+          totalAmount: totalPrice,
+          shippingAddress: {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          },
+          paymentMethod: formData.paymentMethod === 'cod' ? 'cod' : 'card',
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create order');
+      }
+
+      // Show success modal
+      setShowSuccessModal(true);
+
+      // Clear cart and redirect after 2 seconds
       setTimeout(() => {
         clearCart();
         router.push('/');
@@ -320,6 +386,19 @@ export default function CheckoutPage() {
             </motion.div>
           )}
 
+          {paymentError && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-red-100 text-red-700 rounded-md flex items-center justify-center space-x-2"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>{paymentError}</span>
+            </motion.div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Shipping Information */}
             <div className="lg:col-span-2">
@@ -461,21 +540,6 @@ export default function CheckoutPage() {
                         <input
                           type="radio"
                           name="paymentMethod"
-                          value="bkash"
-                          checked={formData.paymentMethod === 'bkash'}
-                          onChange={handleChange}
-                          className="h-4 w-4 text-teal-600 focus:ring-teal-500"
-                        />
-                        <div className="flex items-center space-x-3">
-                          <FaWallet className="text-2xl text-pink-600" />
-                          <span className="text-gray-700">bKash</span>
-                        </div>
-                      </label>
-
-                      <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-teal-500">
-                        <input
-                          type="radio"
-                          name="paymentMethod"
                           value="card"
                           checked={formData.paymentMethod === 'card'}
                           onChange={handleChange}
@@ -504,25 +568,50 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`w-full ${
-                      isSubmitting ? 'bg-teal-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'
-                    } text-white py-3 px-6 rounded-md transition-colors mt-6 flex items-center justify-center`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Processing...
-                      </>
-                    ) : (
-                      'Place Order'
-                    )}
-                  </button>
+                  {/* Payment Simulator - Outside the main form */}
+                  {showPaymentForm && (
+                    <div className="mt-6">
+                      <PaymentSimulator
+                        amount={totalPrice}
+                        onSuccess={handlePaymentSuccess}
+                        onFailure={handlePaymentFailure}
+                      />
+                    </div>
+                  )}
+
+                  {/* Submit Button - Only for Cash on Delivery */}
+                  {formData.paymentMethod === 'cod' && (
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`w-full ${
+                        isSubmitting ? 'bg-teal-400 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'
+                      } text-white py-3 px-6 rounded-md transition-colors mt-6 flex items-center justify-center`}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Processing...
+                        </>
+                      ) : (
+                        'Place Order'
+                      )}
+                    </button>
+                  )}
+
+                  {/* Show Payment Form Button - Only for Card Payment */}
+                  {formData.paymentMethod === 'card' && !showPaymentForm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPaymentForm(true)}
+                      className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 px-6 rounded-md transition-colors mt-6"
+                    >
+                      Enter Card Details
+                    </button>
+                  )}
                 </form>
               </div>
             </div>
