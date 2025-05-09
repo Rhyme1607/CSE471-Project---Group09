@@ -113,12 +113,24 @@ export default function ProductPage() {
     if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('fenty')) {
       return '/Fenty x PUMA Avanti LS Stitched.glb';
     }
+    if (productName.toLowerCase().includes('nike') && productName.toLowerCase().includes('vomero')) {
+      return '/Nike Vomero 18.glb';
+    }
     if (productName.toLowerCase().includes('f1')) {
       return '/F1 Japan Tee.glb';
+    }
+    if (productName.toLowerCase().includes('jordan') && productName.toLowerCase().includes('1 mid')) {
+      return '/Jordan 1 Mid.glb';
+    }
+    if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('camo')) {
+      return '/adidas Essentials Camo Pants.glb';
     }
     // Add support for PUMA Blue Tee
     if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('blue tee')) {
       return '/Blue PUMA Tee.glb';
+    }
+    if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('hoodie')) {
+      return '/adidas NY Bulls Red Hoodie.glb';
     }
     // Add support for adidas Samba OG Shoes
     if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('samba')) {
@@ -133,6 +145,9 @@ export default function ProductPage() {
     }
     if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('backpack')) {
       return '/adidas Classic Backpack.glb';
+    }
+    if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('pioneer')) {
+      return '/PUMA Pioneer Wallet.glb';
     }
     
     return null;

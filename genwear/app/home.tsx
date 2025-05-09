@@ -3,12 +3,13 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Search, Mail, Bell, User, Menu, ChevronRight, ChevronLeft, Star, Plus, LogOut, Settings, Package } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useUser } from './context/UserContext'
 import Footer from '../components/ui/Footer'
 import { cn } from '../lib/utils'
 import CartIcon from './components/CartIcon'
 import { products } from '@/app/utils/productUtils'
+import { useRouter } from "next/navigation"
 
 // Helper function to get all products
 const getAllProducts = (shoesProducts: any[], clothingProducts: any[], accessoriesProducts: any[]) => {
@@ -88,6 +89,16 @@ export default function Home() {
   const [currentAccessoriesPage, setCurrentAccessoriesPage] = useState(0);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, logout } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        router.replace("/mobile-home");
+      }
+    }
+  }, [router]);
 
   // Filter products by category
   const shoesProducts = products.filter(product => product.category === 'shoes');

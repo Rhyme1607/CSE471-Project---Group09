@@ -108,7 +108,7 @@ export default function Page() {
       rating4: false,
       rating3Below: false
     },
-    priceRange: [0, 20000]
+    priceRange: [0, 5000]
   });
 
   // Add useEffect for debouncing search query
@@ -119,6 +119,17 @@ export default function Page() {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Add mobile detection and redirection
+  useEffect(() => {
+    // Check if the device is mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    // If it's a mobile device, redirect to mobile-browse
+    if (isMobile) {
+      router.replace('/mobile-browse');
+    }
+  }, [router]);
 
   if (isPageLoading) {
     return (
@@ -228,7 +239,7 @@ export default function Page() {
         rating4: false,
         rating3Below: false
       },
-      priceRange: [0, 20000]
+      priceRange: [0, 5000]
     });
     setCurrentPage(1);
   };
@@ -615,7 +626,7 @@ export default function Page() {
                     </div>
                     <Slider
                       min={0}
-                      max={20000}
+                      max={5000}
                       step={100}
                       value={filters.priceRange}
                       onValueChange={(value) => {
