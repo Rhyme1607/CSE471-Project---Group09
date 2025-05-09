@@ -20,7 +20,7 @@ export const products = [
     colors: ['Black/Red', 'White/Black', 'Grey/Blue'],
     images: [
       '/JORDAN+6+RINGS-Photoroom.png',
-      '/JORDAN+6+RINGS.avif',
+      '/JORDAN+6+RINGS-1.avif',
       '/JORDAN+6+RINGS-2.avif',
     ],
     modelUrl: '/JORDAN+6+RINGS.glb',
@@ -45,7 +45,7 @@ export const products = [
     images: [
       '/Samba_OG_Shoes_White_JH5633_04_standard-Photoroom.png',
       '/Samba_OG_Shoes_White_JH5633_02_standard_hover-Photoroom.png',
-      '/Samba_OG_Shoes_White_JH5633_03_standard-Photoroom.png',
+      '/IF3814_01_standard.avif',
     ],
     modelUrl: '/adidas Samba OG Shoes.glb',
   },
@@ -170,6 +170,7 @@ export const products = [
       '/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png',
       '/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png',
     ],
+    modelUrl: '/adidas Black Shorts Sports.glb',
   },
   {
     id: 'adidas-pants',
@@ -239,6 +240,7 @@ export const products = [
       '/PUMA Blue Tee-1.jpg',
       '/PUMA Blue Tee-2.jpg',
     ],
+    modelUrl: '/Blue PUMA Tee.glb',
   },
   {
     id: 'fenty-tee',
