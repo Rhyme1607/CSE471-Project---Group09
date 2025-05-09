@@ -103,9 +103,18 @@ export default function ProductPage() {
     if (productName.toLowerCase().includes('jordan luka 3')) {
       return '/Jordan Luka 3.glb';
     }
+    if (productName.toLowerCase().includes('jordan 6 rings')) {
+      return '/Jordan 6 Rings.glb';
+    }
     // Add support for PUMA x LAMELO BALL Golden Child
     if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('lamelo') && productName.toLowerCase().includes('golden')) {
       return '/PUMA x Lamelo Golden.glb';
+    }
+    if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('fenty')) {
+      return '/Fenty x PUMA Avanti LS Stitched.glb';
+    }
+    if (productName.toLowerCase().includes('f1')) {
+      return '/F1 Japan Tee.glb';
     }
     // Add support for PUMA Blue Tee
     if (productName.toLowerCase().includes('puma') && productName.toLowerCase().includes('blue tee')) {
@@ -119,6 +128,13 @@ export default function ProductPage() {
     if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('shorts')) {
       return '/adidas Black Shorts Sports.glb';
     }
+    if (productName.toLowerCase().includes('nike') && productName.toLowerCase().includes('dri-fit')) {
+      return '/Nike Dri-FIT Legacy91 Cap.glb';
+    }
+    if (productName.toLowerCase().includes('adidas') && productName.toLowerCase().includes('backpack')) {
+      return '/adidas Classic Backpack.glb';
+    }
+    
     return null;
   };
 
@@ -589,6 +605,8 @@ function getColorValue(colorName: string): string {
     'Navy': '#000080',
     'Gold': '#FFD700',
     'Silver': '#C0C0C0',
+    'Dark Cyan': '#0095d4',
+    'Navy Blue': '#000080',
     'Black/Red': '#000000',
     'White/Black': '#FFFFFF',
     'Grey/Blue': '#808080',
@@ -600,6 +618,7 @@ function getColorValue(colorName: string): string {
     'Red/Black': '#FF0000',
     'White/Blue': '#FFFFFF',
     'Grey/Orange': '#808080',
+    'Midnight Blue': '#3c4d6d',
   };
   
   return colorMap[colorName] || '#CCCCCC'; // Default to light gray if color not found

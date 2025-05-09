@@ -23,7 +23,7 @@ export const products = [
       '/JORDAN+6+RINGS-1.avif',
       '/JORDAN+6+RINGS-2.avif',
     ],
-    modelUrl: '/JORDAN+6+RINGS.glb',
+    modelUrl: '/Jordan 6 Rings.glb',
   },
   {
     id: 'samba',
@@ -123,6 +123,7 @@ export const products = [
       '/FENTY-x-PUMA-Avanti-LS-Stitched-Men\'s-Sneakers.avif',
       '/FENTY-x-PUMA-Avanti-LS-Stitched-Men\'s-Sneakers (1).avif',
     ],
+    modelUrl: '/Fenty x PUMA Avanti LS Stitched.glb',
   },
   {
     id: 'jordan-1-mid',
@@ -150,7 +151,7 @@ export const products = [
   // Clothing
   {
     id: 'adidas-shorts',
-    name: 'adidas Black Shorts Sports',
+    name: 'adidas Shorts Sports',
     price: 2549.99,
     rating: 4.9,
     reviews: 85,
@@ -164,11 +165,11 @@ export const products = [
       'Quick-drying material',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'Navy', 'Grey'],
+    colors: ['Black', 'Midnight Blue', 'Dark Cyan'],
     images: [
       '/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png',
-      '/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png',
-      '/AEROREADY_Designed_to_Move_Woven_Sport_Shorts_Black_GT8161_01_laydown-Photoroom.png',
+      '/adidas-AeroReady-Designed-To-Move-Woven-Shorts-GT8161.jpg',
+      '/AdidasAEROREADYDesignedtoMoveWovenSportShortsBlackGT8161SportstarProNewcastle_NSW2300Australia.2_1024x1024.jpg',
     ],
     modelUrl: '/adidas Black Shorts Sports.glb',
   },
@@ -191,8 +192,8 @@ export const products = [
     colors: ['Black', 'Navy', 'Grey'],
     images: [
       '/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png',
-      '/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_02_laydown-Photoroom.png',
-      '/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_03_laydown-Photoroom.png',
+      '/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png',
+      '/3-Stripes_Tricot_Regular_Tapered_Track_Pants_Black_JI8809_01_laydown-Photoroom.png',
     ],
   },
   {
@@ -258,12 +259,13 @@ export const products = [
       'Comfortable collar',
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Red'],
+    colors: ['Black'],
     images: [
-      '/F1®-Japan-Men\'s-Tee-Photoroom.png',
-      '/F1®-Japan-Men\'s-Tee-02-Photoroom.png',
-      '/F1®-Japan-Men\'s-Tee-03-Photoroom.png',
+      '/F1®-Japan-Men\'s-Tee (2).avif',
+      '/F1®-Japan-Men\'s-Tee (1).avif',
+      '/F1®-Japan-Men\'s-Tee (3).avif',
     ],
+    modelUrl: '/F1 Japan Tee.glb',
   },
   // Accessories
   {
@@ -288,6 +290,7 @@ export const products = [
       '/U+NK+DF+L91+SPORT+CAP (1).avif',
       '/U+NK+DF+L91+SPORT+CAP (2).avif',
     ],
+    modelUrl: '/Nike Dri-FIT Legacy91 Cap.glb',
   },
   {
     id: 'classic-backpack',
@@ -311,6 +314,7 @@ export const products = [
       '/Adicolor_Backpack_Black_IJ0761_02_standard.avif',
       '/Adicolor_Backpack_Black_IJ0761_04_standard.avif',
     ],
+    modelUrl: '/adidas Classic Backpack.glb',
   },
   {
     id: 'evercat-duffel',
