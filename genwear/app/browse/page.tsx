@@ -1,3 +1,4 @@
+// This file implements the product browsing and search functionality, including filters and search bar.
 "use client";
 
 import Image from "next/image"
