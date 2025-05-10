@@ -951,6 +951,7 @@ export default function Page() {
                 <p className="text-teal-700 mb-8">
                   Discover our latest arrivals and featured collections. Stay ahead of the curve with GenWear's cutting-edge designs and exclusive styles.
                 </p>
+               <Link href= "/promotions#featured">
                 <button className="flex items-center text-teal-700 font-semibold text-lg transition-transform">
                   Buy it now
                   <svg
@@ -969,6 +970,7 @@ export default function Page() {
                     <path d="m12 5 7 7-7 7"></path>
                   </svg>
                 </button>
+                </Link>
               </div>
               <div>
                 <Image
@@ -991,6 +993,7 @@ export default function Page() {
                 <p className="text-teal-700 mb-8">
                   Get ready for summer with our exclusive deals on sportswear and accessories. Embrace the sunshine in style!
                 </p>
+                <Link href= "/promotions#summer">
                 <button className="flex items-center text-teal-700 font-semibold text-lg transition-transform">
                   Shop Now
                   <svg
@@ -1009,6 +1012,7 @@ export default function Page() {
                     <path d="m12 5 7 7-7 7"></path>
                   </svg>
                 </button>
+                </Link>
               </div>
               <div>
                 <Image
