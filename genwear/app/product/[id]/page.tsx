@@ -1,3 +1,4 @@
+// This file implements the product detail view, including images, descriptions, and specifications.
 'use client';
 
 import { useState, useEffect } from 'react';
